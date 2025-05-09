@@ -192,7 +192,7 @@ DRA[,summary(mn)]
 B[,table(Year,is.na(`Prevalence of BMI >=40 kg/m² (morbid obesity)`))]
 
 ## restrict
-BR <- B[Year==2022] #so the distribution info is available before 2017
+BR <- B## [Year==2022] #so the distribution info is available before 2017
 keep <- names(BR)[c(1,2,4,5,
                     6,9,18,21,24,27,30,33)]
 BR <- BR[,..keep]
@@ -248,13 +248,13 @@ curve(dgamma(x,shape=exp(out$par[1]),scale=exp(out$par[2])),from=10,to=40,n=1e3)
 
 ## Loop above work flow
 DRB <- BR[,{
-  print(iso3);print(Sex);print(age);
+  cat(iso3,", ",Sex,", ",age,", ",Year,"\n");
   TGT <- c(l185,         g30,    l20.g185,     l25.g20,     l30.g25,
            l35.g30,     l40.g35,         g40 )
   out <- optim(par=c(0,0),fn=function(x) AgamErr(x,TGT));
   if(abs(out$convergence)>0) print('*** has not converged! ***')
   list(k=exp(out$par[1]),theta=exp(out$par[2]),cvgc=out$convergence)
-},by=.(iso3,Sex,age)]
+},by=.(iso3,Year,Sex,age)]
 
 DRB[,table(cvgc)] #not many
 
