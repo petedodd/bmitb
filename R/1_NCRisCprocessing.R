@@ -283,3 +283,25 @@ N80 <- N80[,.(PopMale=sum(PopMale),
            by=.(Year,AgeGrp,iso3)]
 
 save(N80,file = here("data/N80.Rdata"))
+
+
+
+## ===== Construct a reference population
+## prepare BMI & population data:
+BMI <- DRB[Year==2022] #use latest year
+pop <- melt(N80[Year==2022,.(iso3,age=AgeGrp,PopMale,PopFemale)],id=c("iso3","age"))
+pop[,sex:=ifelse(variable=="PopMale","Men","Women")]
+pop[age=="80+",age:="85plus"]
+
+## merge:
+BMI <- merge(BMI[,.(iso3,Year,Sex,age,k,theta)],
+             pop[,.(iso3,age,Sex=sex,popthou=value)],
+             by=c("iso3","age","Sex"),
+             all.x = FALSE, all.y = FALSE)
+
+## average
+bmirefpop <- BMI[,.(k=weighted.mean(k,popthou),theta=weighted.mean(theta,popthou))]
+curve(dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),from=10,to=45,n=1e3)
+
+## save
+save(bmirefpop, file=here("data/bmirefpop.Rdata"))
