@@ -265,3 +265,21 @@ save(DRB,file=fn)
 
 DRB[,unique(age)]
 DRB[,unique(iso3)]
+
+
+
+## ===== Processing WPP demography
+N <- fread(here("rawdata/WPP2022_PopulationByAge5GroupSex_Medium.zip"))
+N <- N[Time %in% 1990:2022,.(iso3=ISO3_code,Year=Time,AgeGrp,PopMale,PopFemale)]
+N <- N[iso3 != ""]
+p80 <- c("80-84", "85-89", "90-94", "95-99", "100+")
+N80 <- N
+N80[,AG:=AgeGrp]
+N80[AG %in% p80,AG:="80+"]
+N80[,AgeGrp:=AG]
+N80[,AG:=NULL]
+N80 <- N80[,.(PopMale=sum(PopMale),
+              PopFemale=sum(PopFemale)),
+           by=.(Year,AgeGrp,iso3)]
+
+save(N80,file = here("data/N80.Rdata"))
