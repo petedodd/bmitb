@@ -4,8 +4,10 @@
 library(here)
 library(data.table)
 library(ggplot2)
+library(ggrepel)
 
 ## load relevant data
+load(here("data/whokey.Rdata"))      # WHO region to iso3 key
 load(here("data/DRB.Rdata"))         # adult BMI distributions
 load(here("data/bmirefpop.Rdata"))   # reference BMI distribution
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
@@ -63,6 +65,21 @@ DRB <- merge(DRB[age!="20-24"], #NOTE only consider 25+ for now TODO
              TBL[,.(iso3,Sex,age=bmage,tb)],
              by=c("iso3","Sex","age"))
 
+DRB <- merge(DRB,whokey,by="iso3") #WHO regions
+
+## === sense check
+DRB[,mnbmi:=k*theta] #for each country year
+mnbmi0 <- bmirefpop[,k*theta]
+DRB[,range(mnbmi)] #TODO some absolute crazies
+DRB[,range(RR)]    #TODO ditto
+
+ggplot(DRB[RR>0.5 & RR<10],aes(mnbmi,RR,col=g_whoregion))+geom_point(shape=1)+
+  facet_wrap(~g_whoregion)+theme_linedraw()+theme(legend.position="none")+
+  xlab("Mean BMI in each group") + ylab("Associated relative risk")
+
+ggsave(here("output/RR_check1.png"),w=15,h=10)
+
+
 ## === aggregation
 
 ## over time
@@ -92,7 +109,6 @@ ggplot(RRbyT,aes(Year,RR)) +
 ggsave(here("output/RR_year.png"),w=5,h=4)
 
 ## over time & by country
-library(ggrepel)
 
 RRbyTC[iso3=="BDI"]
 

@@ -11,6 +11,7 @@
 library(here)
 library(data.table)
 library(readxl)
+library(ggplot2)
 
 ## === WHO refs for children
 ## want to know: BMIs for z scores -2,-1,+1,+2 in ref pop for sex and age
@@ -305,3 +306,13 @@ curve(dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),from=10,to=45,n=1e3)
 
 ## save
 save(bmirefpop, file=here("data/bmirefpop.Rdata"))
+
+
+## plot
+GP <- ggplot() + xlim(c(10,45)) +
+  geom_function(fun=function(x)dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),n=1e3)+
+  xlab("BMI") + ylab("Density")+
+  theme_classic() + ggpubr::grids()
+GP
+
+ggsave(GP, file=here("output/BMI_refdist.png"),h=4,w=6)
