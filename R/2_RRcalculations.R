@@ -9,6 +9,7 @@ library(ggplot2)
 load(here("data/DRB.Rdata"))         # adult BMI distributions
 load(here("data/bmirefpop.Rdata"))   # reference BMI distribution
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
+TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
@@ -40,9 +41,11 @@ TB <- TB[sex != "a" &
          risk_factor=="all",.(iso3,sex,age=age_group,tb=best)]
 
 ## age conversion
-akey <- data.table(tbage = c( NA, "25-34", "25-34",  "35-44", "35-44",  "45-54", "45-54",  "55-64", "55-64",
+akey <- data.table(tbage = c( NA, "25-34", "25-34",  "35-44", "35-44",  "45-54",
+                             "45-54",  "55-64", "55-64",
                              "65plus", "65plus", "65plus", "65plus", "65plus"),
-                   bmage = c("20-24",  "25-29",  "30-34",  "35-39",  "40-44",  "45-49",  "50-54",  "55-59","60-64",
+                   bmage = c("20-24",  "25-29",  "30-34",  "35-39",  "40-44",
+                             "45-49",  "50-54",  "55-59","60-64",
                              "65-69",  "70-74",  "75-79",  "80-84",  "85plus"))
 akey #check
 
@@ -66,6 +69,13 @@ DRB <- merge(DRB[age!="20-24"], #NOTE only consider 25+ for now TODO
 RRbyT <- DRB[,.(RR=weighted.mean(RR,tb)),by=Year]
 RRbyT[,diff(range(RR))/diff(range(Year))] #0.05 per year ~ 2% per year?
 
+## over time & by country
+RRbyTC <- DRB[,.(RR=weighted.mean(RR,tb)),by=.(Year,iso3)]
+RRbyTC <- merge(RRbyTC,TBT[,.(iso3,Year=year,e_inc_100k,g_whoregion)],by=c("Year","iso3"))
+RRbyTC[,hi:=mean(e_inc_100k)>100,by=iso3]
+RRbyTC[,mn:=mean(e_inc_100k),by=iso3]
+RRbyTC[Year==2022,lbl:=iso3]
+
 ## by age and sex
 RRbyAS <- DRB[,.(RR=weighted.mean(RR,tb)),by=.(Sex,age)]
 
@@ -80,6 +90,26 @@ ggplot(RRbyT,aes(Year,RR)) +
   ylab("Global weighted risk ratio")
 
 ggsave(here("output/RR_year.png"),w=5,h=4)
+
+## over time & by country
+library(ggrepel)
+
+RRbyTC[iso3=="BDI"]
+
+ctp <- 15
+ggplot(RRbyTC[mn>ctp],aes(RR,e_inc_100k,group=iso3,col=g_whoregion,label=lbl)) +
+  geom_line()+
+  geom_point(data=RRbyTC[mn>ctp][!is.na(lbl)])+
+  geom_text_repel(show.legend=FALSE)+
+  theme_linedraw()+
+  scale_y_log10() + scale_x_log10()+
+  ylab("Estimated TB incidence per 100ky  (log scale)")+
+  facet_wrap(~g_whoregion)+
+  theme(legend.position="none")+
+  xlab("Risk-ratio from BMI distribution (log scale)")
+
+
+ggsave(here("output/RR_year_country.png"),w=15,h=10)
 
 ## by age and sex
 ggplot(RRbyAS,aes(age,RR,fill=Sex)) +
