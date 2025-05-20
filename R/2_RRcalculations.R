@@ -15,14 +15,11 @@ TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
-t <- log(1-0.148) #risk function parameter
+t <- -log(1.148) #risk function parameter
+exp(-t)          #risk increase with 1 unit decreast
 
 ## risk ratio calculator
 RRfun <- function(k,theta,t) (1-t*bmirefpop$theta)^bmirefpop$k/(1-t*theta)^k
-
-## example dists
-curve(dgamma(x,shape=24,scale=0.8),from=10,to=45,n=1e3,col=2,main="Example",xlab="BMI",ylab="")
-curve(dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),n=1e3,col=1,add=TRUE)
 
 ## check
 K <- 1e5
@@ -30,6 +27,32 @@ bmi1 <- rgamma(K,shape=24,scale=0.7)
 bmi0 <- rgamma(K,shape=bmirefpop$k,scale=bmirefpop$theta)
 mean(exp(t * (bmi1-30))) / mean(exp(t * (bmi0-30))) #E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
 RRfun(24,0.7,t)                                     #OK
+
+
+## example dists: exaggerated
+png(here("output/eg_dist.png"))
+
+curve(dgamma(x,shape=24,scale=0.8),from=10,to=45,n=1e3,col=2,main="Example",xlab="BMI",ylab="")
+curve(dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),n=1e3,col=1,add=TRUE)
+
+dev.off()
+
+## distribution of where TB comes from
+wts <- exp(t*(bmi0-30))
+bmi0tb <- bmi0[sample(1:K,size=K,replace=TRUE,prob = wts)]
+bmiz <- data.table(population=c(rep("whole population",K),rep("TB",K)),
+                   BMI=c(bmi0,bmi0tb))
+
+ggplot(bmiz,aes(x=BMI,y=after_stat(density),fill=population))+geom_histogram(alpha=0.5) +
+  theme_classic() + theme(legend.position = "top",legend.title = element_blank()) + ggpubr::grids()
+
+ggsave(file=here("output/eg_tb_vs_pop.png"),w=6,h=5)
+
+## correct magnitude of change?
+mean(bmi1)
+mean(bmi0)
+exp(t*(mean(bmi1)-mean(bmi0)))
+RRfun(24,0.7,t) #about as good as one might expect
 
 ## apply to data
 DRB <- DRB[age!="18-19",.(iso3,Year,Sex,age,k,theta)] #restrict
@@ -112,6 +135,7 @@ ggsave(here("output/RR_year.png"),w=5,h=4)
 
 RRbyTC[iso3=="BDI"]
 
+## for countries with mean per capita over ctp
 ctp <- 15
 ggplot(RRbyTC[mn>ctp],aes(RR,e_inc_100k,group=iso3,col=g_whoregion,label=lbl)) +
   geom_line()+
