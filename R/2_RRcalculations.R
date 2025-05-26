@@ -9,7 +9,8 @@ library(ggrepel)
 ## load relevant data
 load(here("data/whokey.Rdata"))      # WHO region to iso3 key
 load(here("data/DRB.Rdata"))         # adult BMI distributions
-load(here("data/bmirefpop.Rdata"))   # reference BMI distribution
+load(here("data/bmirefpop2.Rdata"))   # reference BMI distribution
+bmirefpop <- bmirefpop2               #try new version
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
 TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 
@@ -18,8 +19,10 @@ TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 t <- -log(1.148) #risk function parameter
 exp(-t)          #risk increase with 1 unit decreast
 
+
 ## risk ratio calculator
 RRfun <- function(k,theta,t) (1-t*bmirefpop$theta)^bmirefpop$k/(1-t*theta)^k
+
 
 ## check
 K <- 1e5
@@ -27,6 +30,50 @@ bmi1 <- rgamma(K,shape=24,scale=0.7)
 bmi0 <- rgamma(K,shape=bmirefpop$k,scale=bmirefpop$theta)
 mean(exp(t * (bmi1-30))) / mean(exp(t * (bmi0-30))) #E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
 RRfun(24,0.7,t)                                     #OK
+
+## bilinear version
+## see: https://search.r-project.org/CRAN/refmans/expint/html/gammainc.html
+## Γ(a,x)=Γ(a)(1−P(a,x))
+## https://search.r-project.org/R/refmans/stats/html/GammaDist.html
+t1 <- t2 <- t
+RRfunBL0 <- function(k,theta,t1,t2){
+  x0 <- 25; a1 <- -t1; a2 <- -t2;
+  ## stuff x Γ(k,x0*(a2+1/theta))/Γ(k) = stuff x (1-P(k,x0*(a2+1/theta))) = stuff x P(k,x0*(a2+1/theta),lower=FALSE)
+  lans2 <- a2*x0 + pgamma(k,x0*(a2+1/theta),log=TRUE,lower=TRUE) - k * log(1+a2*theta)
+  lans1 <- a1*x0 + pgamma(k,x0*(a1+1/theta),log=TRUE,lower=FALSE) - k * log(1+a1*theta)
+  exp(lans1) + exp(lans2)
+}
+## NOTE works in tests
+
+RRfunBL <- function(k,theta,t1,t2) RRfunBL0(k,theta,t1,t2) / RRfunBL0(bmirefpop$k,bmirefpop$theta,t1,t2)
+
+
+## check
+BL <- function(x,t1,t2){
+  ans <- (x-25)
+  less <- ans<0
+  ans[less] <- t1*ans[less]
+  ans[!less] <- t2*ans[!less]
+  ans
+}
+xx <- seq(from=10,40,by=0.1)
+plot(xx,BL(xx,t1,t2),type="l")
+plot(xx,BL(xx,t1,t2-0.1),type="l")
+
+mean(exp(BL(bmi1,t1,t1))) / mean(exp(BL(bmi0,t1,t1)))
+mean(exp(t1 * (bmi1-30))) / mean(exp(t1 * (bmi0-30))) #E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
+RRfunBL0(24,0.7,t1,t1) / RRfunBL0(bmirefpop$k,bmirefpop$theta,t1,t1)
+RRfunBL(24,0.7,t1,t1)
+
+## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
+t1 <- -log(1.18) #risk function parameter
+exp(-t1)          #risk increase with 1 unit decreast
+t2 <- -log(1.069) #risk function parameter
+exp(-t2)          #risk increase with 1 unit decreast
+
+mean(exp(BL(bmi1,t1,t2))) / mean(exp(BL(bmi0,t1,t2)))
+RRfunBL(24,0.7,t1,t2) ## OK
+
 
 
 ## example dists: exaggerated

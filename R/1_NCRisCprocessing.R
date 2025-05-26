@@ -307,6 +307,13 @@ curve(dgamma(x,shape=bmirefpop$k,scale=bmirefpop$theta),from=10,to=45,n=1e3)
 ## save
 save(bmirefpop, file=here("data/bmirefpop.Rdata"))
 
+bmirefpop2 <- BMI[,.(mn=weighted.mean(k*theta,popthou),vc=weighted.mean(k*theta^2,popthou))]
+bmirefpop2[,c("k","theta"):=.(mn/(vc/mn),vc/mn)]
+curve(dgamma(x,shape=bmirefpop2$k,scale=bmirefpop2$theta),from=10,to=45,n=1e3)
+
+## save
+save(bmirefpop2, file=here("data/bmirefpop2.Rdata"))
+
 
 ## plot
 GP <- ggplot() + xlim(c(10,45)) +
@@ -316,3 +323,11 @@ GP <- ggplot() + xlim(c(10,45)) +
 GP
 
 ggsave(GP, file=here("output/BMI_refdist.png"),h=4,w=6)
+
+GP <- ggplot() + xlim(c(10,45)) +
+  geom_function(fun=function(x)dgamma(x,shape=bmirefpop2$k,scale=bmirefpop2$theta),n=1e3)+
+  xlab("BMI") + ylab("Density")+
+  theme_classic() + ggpubr::grids()
+GP
+
+ggsave(GP, file=here("output/BMI_refdist2.png"),h=4,w=6)
