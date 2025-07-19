@@ -15,6 +15,18 @@ bmirefpop <- bmirefpop2 # try new version
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
 TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 
+whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
+whozt <- c(
+  "Africa", "The Americas",
+  "Eastern Mediterranean", "Europe", "South-East Asia",
+  "Western Pacific"
+)
+for (i in seq_along(whoz)) {
+  whokey[g_whoregion == whoz[i], region := whozt[i]]
+}
+whokeyshort <- unique(whokey[, .(g_whoregion, region)])
+whokeyshort <- rbind(whokeyshort, data.table(g_whoregion = "Global", region = "Global"))
+
 
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
@@ -421,6 +433,85 @@ ggplot(RRbySR, aes(g_whoregion, value, fill = variable)) +
 
 ggsave(here("output/RR_sex_reg_lopoff.png"), w = 12, h = 5)
 
+## --- version 2
+## by region and sex
+RRbySR <- DRB[Year == 2022, .(
+  RR0 = weighted.mean(RR0, tb),
+  RR17 = weighted.mean(RR17, tb),
+  RR18.5 = weighted.mean(RR18.5, tb)
+  ), by = .(Sex, g_whoregion)]
+RRbySRb <- DRB[Year == 2022, .(
+  RR0 = weighted.mean(RR0, tb),
+  RR17 = weighted.mean(RR17, tb),
+  RR18.5 = weighted.mean(RR18.5, tb)
+  ), by = .(g_whoregion)]
+RRbySRb[, Sex := "Both"]
+RRbySR <- rbind(RRbySR, RRbySRb)
+RRbySR[, RR17 := RR17 / RR0]
+RRbySR[, RR18.5 := RR18.5 / RR0]
+RRbySR <- melt(
+  RRbySR[, .(Sex, g_whoregion,
+    `BMI = 17` = 1 - RR17,
+    `BMI = 18.5` = 1 - RR18.5
+  )],
+  id = c("Sex", "g_whoregion")
+)
+
+## sex globall
+RRbySG <- DRB[Year == 2022, .(
+  RR0 = weighted.mean(RR0, tb),
+  RR17 = weighted.mean(RR17, tb),
+  RR18.5 = weighted.mean(RR18.5, tb)
+  ), by = .(Sex)]
+RRbySGb <- DRB[Year == 2022, .(
+  RR0 = weighted.mean(RR0, tb),
+  RR17 = weighted.mean(RR17, tb),
+  RR18.5 = weighted.mean(RR18.5, tb)
+)]
+RRbySGb[, Sex := "Both"]
+RRbySG <- rbind(RRbySG, RRbySGb)
+RRbySG[, RR17 := RR17 / RR0]
+RRbySG[, RR18.5 := RR18.5 / RR0]
+RRbySG <- melt(
+  RRbySG[, .(Sex,
+    `BMI = 17` = 1 - RR17,
+    `BMI = 18.5` = 1 - RR18.5
+  )],
+  id = c("Sex")
+)
+RRbySG[, g_whoregion := "Global"]
+RRbySR <- rbind(RRbySR, RRbySG) # join
+
+
+RRbySR$g_whoregion <- factor(RRbySR$g_whoregion,
+  levels = rev(c(sort(unique(whokey$g_whoregion)), "Global")),
+  ordered = TRUE
+  )
+RRbySR$Sex <- factor(RRbySR$Sex, levels = c("Men", "Women", "Both"), ordered = TRUE)
+
+RRbySR <- merge(RRbySR, whokeyshort, by = "g_whoregion")
+lvls <- whokeyshort[order(g_whoregion)]$region
+lvls <- c(lvls[-5], "Global")
+RRbySR$region <- factor(RRbySR$region, levels = rev(lvls), ordered = TRUE)
+
+
+
+## by region and sex
+ggplot(RRbySR, aes(region, value, fill = variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_linedraw() +
+  facet_grid(Sex~.)+
+  coord_flip()+
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
+  ylab("Reduction in tuberculosis incidence") +
+  xlab("Region") +
+  scale_fill_paletteer_d("PrettyCols::Bright") +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank()
+  )
+
+ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
 
 
 ## country lopoffs
