@@ -542,3 +542,56 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
 
 ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
+
+
+## === map
+library(sf)
+library(wbmapdata) ## https://github.com/petedodd/wbmapdata
+
+## sqrt_trans <- function() {
+##   scales::trans_new(
+##     name = "sqrt",
+##     transform = function(x) x^0.5,
+##     inverse = function(x) x^2
+##   )
+## }
+
+## merge in
+MPD <- sp::merge(RRbyC, world, by = "iso3")
+
+## convert & add mid-coords
+MP <- st_as_sf(MPD)
+
+##  version
+p <- ggplot(data = MP) +
+  geom_sf(aes(fill = 1e2 * redn)) +
+  scale_fill_distiller(
+    name = "Reduction in tuberculosis incidence (%)",
+    na.value = "grey", trans = "sqrt",
+    palette = "Reds", direction = 1
+  ) +
+  geom_sf(
+    aes(
+      geometry = mid,
+      size = as.numeric(redn * tb / 1e3)
+    ),
+    show.legend = "point",
+    shape = 1
+  ) +
+  scale_size_continuous(name = "Reduction in tuberculosis incidence (thousands)") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.title.align = 0.5,
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    legend.key.width  = unit(2, "lines"),
+    legend.key.height = unit(1, "lines")
+  ) +
+  guides(
+    fill = guide_colourbar(order = 1, position = "top"),
+    size = guide_legend(order = 2, position = "bottom")
+  )
+p
+
+ggsave(p, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
