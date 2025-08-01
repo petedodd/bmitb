@@ -99,23 +99,56 @@ mean(bmi0)
 exp(t * (mean(bmi1) - mean(bmi0)))
 RRfun(24, 0.7, t) # about as good as one might expect
 
-
-## jj
 ## merge against TB estimates
-## restrict:
-TB <- TB[sex != "a" &
-  !age_group %in% c("all", "0-14", "0-4", "15-24", "15plus", "18plus", "5-14") &
-  risk_factor == "all", .(iso3, sex, age = age_group, tb = best)]
+## restrict:  "15-24" included
+TB <- TB[
+  sex != "a" &
+    !age_group %in% c("all", "0-14", "0-4", "15plus", "18plus", "5-14") &
+    risk_factor == "all",
+  .(iso3, sex,
+    age = age_group, tb = best,
+    S = (hi - lo) / 3.92
+  )
+]
+
+
+## split 15-24
+## TODO notification-based split
+xtra <- TB[age == "15-24"]
+xtra[, tb := tb / 2]
+xtra[, S := S / sqrt(2)]
+xtra1 <- copy(xtra)
+xtra2 <- copy(xtra)
+xtra1[, age := "15-19"]
+xtra2[, age := "20-24"]
+xtra <- rbind(xtra1, xtra2)
+TB <- rbind(TB[age != "15-24"], xtra)
+TB[, unique(age)]
+
 
 ## age conversion
+## akey <- data.table(
+##   tbage = c(
+##     NA, "25-34", "25-34", "35-44", "35-44", "45-54",
+##     "45-54", "55-64", "55-64",
+##     "65plus", "65plus", "65plus", "65plus", "65plus"
+##   ),
+##   bmage = c(
+##     "20-24", "25-29", "30-34", "35-39", "40-44",
+##     "45-49", "50-54", "55-59", "60-64",
+##     "65-69", "70-74", "75-79", "80-84", "85plus"
+##   )
+## )
+
 akey <- data.table(
   tbage = c(
-    NA, "25-34", "25-34", "35-44", "35-44", "45-54",
+    "15-19", "20-24", "25-34", "25-34",
+    "35-44", "35-44", "45-54",
     "45-54", "55-64", "55-64",
     "65plus", "65plus", "65plus", "65plus", "65plus"
   ),
   bmage = c(
-    "20-24", "25-29", "30-34", "35-39", "40-44",
+    "15-19", "20-24", "25-29", "30-34", "35-39", "40-44",
     "45-49", "50-54", "55-59", "60-64",
     "65-69", "70-74", "75-79", "80-84", "85plus"
   )
@@ -124,12 +157,17 @@ akey # check
 
 
 ## weight TB evenly over duplicates
+## TODO missing young
 TBL <- merge(TB, akey, by.x = "age", by.y = "tbage", allow.cartesian = TRUE)
 TBL[, K := .N, by = .(iso3, sex, age)]
 TBL[iso3 == "AFG"] # OK
 TBL[, tb := tb / K] # even weighting...TODO revisit
 TBL[, K := NULL]
 TBL[, Sex := ifelse(sex == "m", "Men", "Women")]
+
+## TODO
+## average ado jj
+
 
 ## merge
 DRB <- merge(DRB[age != "20-24"], # NOTE only consider 25+ for now TODO
