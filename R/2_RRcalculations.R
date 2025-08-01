@@ -7,12 +7,11 @@ library(ggplot2)
 library(ggrepel)
 library(paletteer)
 
-## load(here("data/bmirefpop2.Rdata")) # reference BMI distribution
-## bmirefpop <- bmirefpop2 # try new version
-
 ## load relevant data
 load(here("data/whokey.Rdata")) # WHO region to iso3 key
+load(here("data/DRA.Rdata")) # ado BMI distributions
 load(here("data/DRB.Rdata")) # adult BMI distributions
+
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
 TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
@@ -25,7 +24,11 @@ for (i in seq_along(whoz)) {
   whokey[g_whoregion == whoz[i], region := whozt[i]]
 }
 whokeyshort <- unique(whokey[, .(g_whoregion, region)])
-whokeyshort <- rbind(whokeyshort, data.table(g_whoregion = "Global", region = "Global"))
+whokeyshort <- rbind(
+  whokeyshort,
+  data.table(g_whoregion = "Global", region = "Global")
+)
+
 
 
 ## Saunders et al linear parameters
@@ -35,13 +38,16 @@ exp(-t) # risk increase with 1 unit decrease
 
 ## risk ratio calculator
 bmirefpop <- data.table(k = 25.0, theta = 1.0) #for testing
-RRfun <- function(k, theta, t) (1 - t * bmirefpop$theta)^bmirefpop$k / (1 - t * theta)^k
+RRfun <- function(k, theta, t) {
+  (1 - t * bmirefpop$theta)^bmirefpop$k / (1 - t * theta)^k
+}
 
 ## check
 K <- 1e5
 bmi1 <- rgamma(K, shape = 24, scale = 0.7)
 bmi0 <- rgamma(K, shape = bmirefpop$k, scale = bmirefpop$theta)
-mean(exp(t * (bmi1 - 30))) / mean(exp(t * (bmi0 - 30))) # E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
+## E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
+mean(exp(t * (bmi1 - 30))) / mean(exp(t * (bmi0 - 30)))
 RRfun(24, 0.7, t) # OK
 
 ## bilinear version
@@ -55,16 +61,20 @@ RRfunBL0 <- function(k, theta, t1, t2) {
   a2 <- -t2
   ## stuff x Γ(k,x0*(a2+1/theta))/Γ(k) =
   ## stuff x (1-P(k,x0*(a2+1/theta))) = stuff x P(k,x0*(a2+1/theta),lower=FALSE)
-  lans2 <- a2 * x0 + pgamma(k, x0 * (a2 + 1 / theta), log = TRUE, lower = TRUE) -
+  lans2 <- a2 * x0 +
+    pgamma(k, x0 * (a2 + 1 / theta), log = TRUE, lower = TRUE) -
     k * log(1 + a2 * theta)
-  lans1 <- a1 * x0 + pgamma(k, x0 * (a1 + 1 / theta), log = TRUE, lower = FALSE) -
+  lans1 <- a1 * x0 +
+    pgamma(k, x0 * (a1 + 1 / theta), log = TRUE, lower = FALSE) -
     k * log(1 + a1 * theta)
   exp(lans1) + exp(lans2)
 }
 ## NOTE works in tests
 
-RRfunBL <- function(k, theta, t1, t2) RRfunBL0(k, theta, t1, t2) /
-                                        RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t2)
+RRfunBL <- function(k, theta, t1, t2){
+ RRfunBL0(k, theta, t1, t2) /
+   RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t2)
+}
 
 ## check
 BL <- function(x, t1, t2) {
@@ -125,21 +135,6 @@ xtra <- rbind(xtra1, xtra2)
 TB <- rbind(TB[age != "15-24"], xtra)
 TB[, unique(age)]
 
-
-## age conversion
-## akey <- data.table(
-##   tbage = c(
-##     NA, "25-34", "25-34", "35-44", "35-44", "45-54",
-##     "45-54", "55-64", "55-64",
-##     "65plus", "65plus", "65plus", "65plus", "65plus"
-##   ),
-##   bmage = c(
-##     "20-24", "25-29", "30-34", "35-39", "40-44",
-##     "45-49", "50-54", "55-59", "60-64",
-##     "65-69", "70-74", "75-79", "80-84", "85plus"
-##   )
-## )
-
 akey <- data.table(
   tbage = c(
     "15-19", "20-24", "25-34", "25-34",
@@ -157,7 +152,6 @@ akey # check
 
 
 ## weight TB evenly over duplicates
-## TODO missing young
 TBL <- merge(TB, akey, by.x = "age", by.y = "tbage", allow.cartesian = TRUE)
 TBL[, K := .N, by = .(iso3, sex, age)]
 TBL[iso3 == "AFG"] # OK
@@ -165,20 +159,31 @@ TBL[, tb := tb / K] # even weighting...TODO revisit
 TBL[, K := NULL]
 TBL[, Sex := ifelse(sex == "m", "Men", "Women")]
 
-## TODO
-## average ado jj
+## average ado
+DRA <- DRA[cvgc == 0, # only converged
+  .(mn = mean(k * theta), vc = mean(k * theta^2)), # mean of mean/var
+  by = .(iso3, Sex = ifelse(Sex == "Boys", "Men", "Women"))
+]
+DRA[, c("k", "theta", "age") :=
+  .(
+    mn / (vc / mn),
+    vc / mn,
+    "15-19"
+  )] # make k/theta
+
+## append
+DRB <- rbind(DRB, DRA[, .(iso3, Year = 2022, Sex, age, k, theta, cvgc = 0)])
 
 
 ## merge
-DRB <- merge(DRB[age != "20-24"], # NOTE only consider 25+ for now TODO
-  TBL[, .(iso3, Sex, age = bmage, tb)],
+DRB <- merge(DRB,
+  TBL[, .(iso3, Sex, age = bmage, tb, S)],
   by = c("iso3", "Sex", "age")
 )
-
 DRB <- merge(DRB, whokey, by = "iso3") # WHO regions
 
 ## apply to data
-DRB <- DRB[age != "18-19", .(iso3, Year, Sex, age, k, theta, tb, g_whoregion)] # restrict
+DRB <- DRB[, .(iso3, Year, Sex, age, k, theta, tb, S, g_whoregion)] # restrict
 DRB[, RR := RRfun(k, theta, t)]
 
 ## === sense check
@@ -188,7 +193,10 @@ DRB[, range(mnbmi)] # TODO some absolute crazies
 DRB[, range(RR)] # TODO ditto
 
 
-ggplot(DRB[RR > 0.5 & RR < 10], aes(mnbmi, RR, col = g_whoregion)) +
+ggplot(
+  DRB[RR > 0.5 & RR < 10 & mnbmi < 50],
+  aes(mnbmi, RR, col = g_whoregion)
+) +
   geom_point(shape = 1) +
   facet_wrap(~g_whoregion) +
   theme_linedraw() +
@@ -196,61 +204,18 @@ ggplot(DRB[RR > 0.5 & RR < 10], aes(mnbmi, RR, col = g_whoregion)) +
   xlab("Mean BMI in each group") +
   ylab("Associated relative risk")
 
+
 ggsave(here("output/RR_check1.png"), w = 15, h = 10)
 
 
 
 ## === aggregation
-## over time
-RRbyT <- DRB[, .(RR = weighted.mean(RR, tb)), by = Year]
-RRbyT[, diff(range(RR)) / diff(range(Year))] # 0.05 per year ~ 2% per year?
-
-## over time & by country
-RRbyTC <- DRB[, .(RR = weighted.mean(RR, tb)), by = .(Year, iso3)]
-RRbyTC <- merge(RRbyTC, TBT[, .(iso3, Year = year, e_inc_100k, g_whoregion)], by = c("Year", "iso3"))
-RRbyTC[, hi := mean(e_inc_100k) > 100, by = iso3]
-RRbyTC[, mn := mean(e_inc_100k), by = iso3]
-RRbyTC[Year == 2022, lbl := iso3]
 
 ## by age and sex
 RRbyAS <- DRB[, .(RR = weighted.mean(RR, tb)), by = .(Sex, age)]
 
 
 ## === plots
-
-## over time
-ggplot(RRbyT, aes(Year, RR)) +
-  geom_line() +
-  theme_linedraw() +
-  expand_limits(y = c(0, NA)) +
-  ylab("Global weighted risk ratio")
-
-
-ggsave(here("output/RR_year.png"), w = 5, h = 4)
-
-
-## over time & by country
-
-RRbyTC[iso3 == "BDI"]
-
-
-## for countries with mean per capita over ctp
-ctp <- 15
-ggplot(RRbyTC[mn > ctp], aes(RR, e_inc_100k, group = iso3, col = g_whoregion, label = lbl)) +
-  geom_line() +
-  geom_point(data = RRbyTC[mn > ctp][!is.na(lbl)]) +
-  geom_text_repel(show.legend = FALSE) +
-  theme_linedraw() +
-  scale_y_log10() +
-  scale_x_log10() +
-  ylab("Estimated TB incidence per 100ky  (log scale)") +
-  facet_wrap(~g_whoregion) +
-  theme(legend.position = "none") +
-  xlab("Risk-ratio from BMI distribution (log scale)")
-
-
-ggsave(here("output/RR_year_country.png"), w = 15, h = 10)
-
 
 ## by age and sex
 ggplot(RRbyAS, aes(age, RR, fill = Sex)) +
@@ -261,25 +226,25 @@ ggplot(RRbyAS, aes(age, RR, fill = Sex)) +
   theme(legend.position = "top")
 
 
-ggsave(here("output/RR_age_sex.png"), w = 7, h = 5)
-
-
 
 ## ============ lopoff work
-
 RRlopoff0 <- function(k, theta, t1, t2, L) {
   x0 <- 25
   a1 <- -t1
   a2 <- -t2
-  ans <- exp(a1 * x0) * (pgamma(x0, k, scale = theta / (1 + a1 * theta)) -
-    pgamma(L, k, scale = theta / (1 + a1 * theta))) / (1 + a1 * theta)^k +
-    exp(a2 * x0) * pgamma(x0, k, scale = theta / (1 + a2 * theta), lower.tail = FALSE) / (1 + a2 * theta)^k
+  ans1 <- exp(a1 * x0) * (
+    pgamma(x0, k, scale = theta / (1 + a1 * theta)) -
+      pgamma(L, k, scale = theta / (1 + a1 * theta))
+  ) / (1 + a1 * theta)^k
+  ans2 <- exp(a2 * x0) *
+    pgamma(x0, k, scale = theta / (1 + a2 * theta), lower.tail = FALSE) /
+    (1 + a2 * theta)^k
+  ans <- ans1 + ans2
   ans / pgamma(L, k, scale = theta, lower.tail = FALSE)
 }
 
-## ## test
-## RRfunBL1(24,0.7,t1,t1)
-## RRlopoff0(24,0.7,t1,t1,17)
+## test
+RRlopoff0(24,0.7,t1,t1,17)
 
 
 RRlopoff <- function(k, theta, t1, t2, L) {
@@ -289,7 +254,6 @@ RRlopoff <- function(k, theta, t1, t2, L) {
 
 
 ## ## test
-## RRfunBL2(24,0.7,t1,t1)
 ## RRlopoff(24,0.7,t1,t1,0)
 ## RRlopoff(24,0.7,t1,t1,17)
 ## compute values:
@@ -542,14 +506,6 @@ ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 library(sf)
 library(wbmapdata) ## https://github.com/petedodd/wbmapdata
 
-## sqrt_trans <- function() {
-##   scales::trans_new(
-##     name = "sqrt",
-##     transform = function(x) x^0.5,
-##     inverse = function(x) x^2
-##   )
-## }
-
 ## merge in
 MPD <- sp::merge(RRbyC, world, by = "iso3")
 
@@ -557,6 +513,7 @@ MPD <- sp::merge(RRbyC, world, by = "iso3")
 MP <- st_as_sf(MPD)
 
 ##  version
+sznm <- "Reduction in tuberculosis incidence (thousands)"
 p <- ggplot(data = MP) +
   geom_sf(aes(fill = 1e2 * redn)) +
   scale_fill_distiller(
@@ -572,7 +529,7 @@ p <- ggplot(data = MP) +
     show.legend = "point",
     shape = 1
   ) +
-  scale_size_continuous(name = "Reduction in tuberculosis incidence (thousands)") +
+  scale_size_continuous(name = sznm) +
   theme_minimal() +
   theme(
     legend.position = "right",
