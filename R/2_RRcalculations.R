@@ -7,14 +7,14 @@ library(ggplot2)
 library(ggrepel)
 library(paletteer)
 
+## load(here("data/bmirefpop2.Rdata")) # reference BMI distribution
+## bmirefpop <- bmirefpop2 # try new version
+
 ## load relevant data
 load(here("data/whokey.Rdata")) # WHO region to iso3 key
 load(here("data/DRB.Rdata")) # adult BMI distributions
-load(here("data/bmirefpop2.Rdata")) # reference BMI distribution
-bmirefpop <- bmirefpop2 # try new version
 TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
 TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
-
 whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
 whozt <- c(
   "Africa", "The Americas",
@@ -31,9 +31,10 @@ whokeyshort <- rbind(whokeyshort, data.table(g_whoregion = "Global", region = "G
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
 t <- -log(1.148) # risk function parameter
-exp(-t) # risk increase with 1 unit decreast
+exp(-t) # risk increase with 1 unit decrease
 
 ## risk ratio calculator
+bmirefpop <- data.table(k = 25.0, theta = 1.0) #for testing
 RRfun <- function(k, theta, t) (1 - t * bmirefpop$theta)^bmirefpop$k / (1 - t * theta)^k
 
 ## check
@@ -52,14 +53,18 @@ RRfunBL0 <- function(k, theta, t1, t2) {
   x0 <- 25
   a1 <- -t1
   a2 <- -t2
-  ## stuff x Γ(k,x0*(a2+1/theta))/Γ(k) = stuff x (1-P(k,x0*(a2+1/theta))) = stuff x P(k,x0*(a2+1/theta),lower=FALSE)
-  lans2 <- a2 * x0 + pgamma(k, x0 * (a2 + 1 / theta), log = TRUE, lower = TRUE) - k * log(1 + a2 * theta)
-  lans1 <- a1 * x0 + pgamma(k, x0 * (a1 + 1 / theta), log = TRUE, lower = FALSE) - k * log(1 + a1 * theta)
+  ## stuff x Γ(k,x0*(a2+1/theta))/Γ(k) =
+  ## stuff x (1-P(k,x0*(a2+1/theta))) = stuff x P(k,x0*(a2+1/theta),lower=FALSE)
+  lans2 <- a2 * x0 + pgamma(k, x0 * (a2 + 1 / theta), log = TRUE, lower = TRUE) -
+    k * log(1 + a2 * theta)
+  lans1 <- a1 * x0 + pgamma(k, x0 * (a1 + 1 / theta), log = TRUE, lower = FALSE) -
+    k * log(1 + a1 * theta)
   exp(lans1) + exp(lans2)
 }
 ## NOTE works in tests
 
-RRfunBL <- function(k, theta, t1, t2) RRfunBL0(k, theta, t1, t2) / RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t2)
+RRfunBL <- function(k, theta, t1, t2) RRfunBL0(k, theta, t1, t2) /
+                                        RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t2)
 
 ## check
 BL <- function(x, t1, t2) {
@@ -74,7 +79,8 @@ plot(xx, BL(xx, t1, t2), type = "l")
 plot(xx, BL(xx, t1, t2 - 0.1), type = "l")
 
 mean(exp(BL(bmi1, t1, t1))) / mean(exp(BL(bmi0, t1, t1)))
-mean(exp(t1 * (bmi1 - 30))) / mean(exp(t1 * (bmi0 - 30))) # E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
+## E_1[exp(t*X)] / E_0[exp(t*X)] with a shift for numerics
+mean(exp(t1 * (bmi1 - 30))) / mean(exp(t1 * (bmi0 - 30)))
 RRfunBL0(24, 0.7, t1, t1) / RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t1)
 RRfunBL(24, 0.7, t1, t1)
 
@@ -94,57 +100,7 @@ exp(t * (mean(bmi1) - mean(bmi0)))
 RRfun(24, 0.7, t) # about as good as one might expect
 
 
-## example dists: exaggerated
-png(here("output/eg_dist.png"))
-
-curve(dgamma(x, shape = 24, scale = 0.8),
-  from = 10, to = 45, n = 1e3, col = 2,
-  main = "Example", xlab = "BMI", ylab = ""
-)
-curve(dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta), n = 1e3, col = 1, add = TRUE)
-
-dev.off()
-
-## distribution of where TB comes from
-wts <- exp(t * (bmi0 - 30))
-bmi0tb <- bmi0[sample(1:K, size = K, replace = TRUE, prob = wts)]
-bmiz <- data.table(
-  population = c(rep("whole population", K), rep("TB", K)),
-  BMI = c(bmi0, bmi0tb)
-)
-
-
-ggplot(bmiz, aes(x = BMI, y = after_stat(density), fill = population)) +
-  geom_histogram(alpha = 0.5) +
-  theme_classic() +
-  theme(legend.position = "top", legend.title = element_blank()) +
-  ggpubr::grids()
-
-ggsave(file = here("output/eg_tb_vs_pop.png"), w = 6, h = 5)
-
-
-## example of "lop-off"
-
-## example dists: exaggerated
-png(here("output/eg_lopoff.png"))
-
-
-## truncated renormalized
-lopoff17 <- function(x) {
-  ifelse(x < 17, 0,
-    dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) /
-      (1 - pgamma(17, shape = bmirefpop$k, scale = bmirefpop$theta))
-  )
-}
-
-curve(lopoff17(x), from = 10, to = 45, n = 1e3, col = 2, , main = "", xlab = "BMI", ylab = "")
-abline(v = 17, col = 2, lty = 3)
-curve(dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta), n = 1e3, col = 1, add = TRUE)
-
-dev.off()
-
-
-
+## jj
 ## merge against TB estimates
 ## restrict:
 TB <- TB[sex != "a" &
@@ -544,7 +500,7 @@ ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
 
 
-## === map
+## === map plots
 library(sf)
 library(wbmapdata) ## https://github.com/petedodd/wbmapdata
 
