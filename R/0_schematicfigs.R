@@ -49,6 +49,8 @@ GP
 
 ggsave(GP, file = here("output/eg_dist.png"), w = 6, h = 5)
 
+DP <- dml(ggobj = GP) # convert
+
 
 ## ==== distribution of where TB comes from
 wts <- exp(t * (bmi0 - 30))
@@ -69,6 +71,8 @@ GPC <- ggplot(bmiz, aes(x = BMI, y = after_stat(density), fill = population)) +
 GPC
 
 ggsave(GPC, file = here("output/eg_tb_vs_pop.png"), w = 6, h = 5)
+
+DPC <- dml(ggobj = GPC) # convert
 
 ## ======= lopoffs
 
@@ -99,6 +103,8 @@ GP2
 
 ggsave(GP2, file = here("output/eg_lopoff.png"), w = 6, h = 5)
 
+DP2 <- dml(ggobj = GP2) # convert
+
 
 ## ====== risk functions
 GP3 <- ggplot() +
@@ -116,17 +122,20 @@ GP3
 
 ggsave(GP3, file = here("output/eg_blriskfun.png"), w = 6, h = 5)
 
+DP3 <- dml(ggobj = GP3) #convert
+
+
 
 ## save out relevant plots as PPT
 doc <- read_pptx()
 doc <- add_slide(doc, layout = "Blank")
-doc <- ph_with(doc, GP, location = ph_location_fullsize())
+doc <- ph_with(doc, DP, location = ph_location_fullsize())
 doc <- add_slide(doc, layout = "Blank")
-doc <- ph_with(doc, GP2, location = ph_location_fullsize())
+doc <- ph_with(doc, DP2, location = ph_location_fullsize())
 doc <- add_slide(doc, layout = "Blank")
-doc <- ph_with(doc, GP3, location = ph_location_fullsize())
+doc <- ph_with(doc, DP3, location = ph_location_fullsize())
 doc <- add_slide(doc, layout = "Blank")
-doc <- ph_with(doc, GPC, location = ph_location_fullsize())
+doc <- ph_with(doc, DPC, location = ph_location_fullsize())
 print(doc, target = "~/Downloads/nutrition_schematics.pptx")
 
 
