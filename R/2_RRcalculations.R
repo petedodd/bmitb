@@ -29,6 +29,12 @@ whokeyshort <- rbind(
   data.table(g_whoregion = "Global", region = "Global")
 )
 
+ssum <- function(x) sqrt(sum(x^2))
+rf <- function(x) {
+  formatC(round(x, digits = -2), digits = 0, format = "d", big.mark = " ")
+}
+brkt <- function(x, y, z) paste0(x, " (", y, " to ", z, ")")
+brkt(1, 2, 3)
 
 
 ## Saunders et al linear parameters
@@ -471,6 +477,47 @@ ggplot(RRbySR, aes(region, value, fill = variable)) +
 
 ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
 
+## first go at table output
+TBreg <- merge(TB, whokey, by = "iso3")
+TBregS <- TBreg[, .(tb = sum(tb), S = ssum(S)),
+  by = .(region, Sex = ifelse(sex == "f", "Women", "Men"))
+  ]
+TBregB <- TBreg[, .(tb = sum(tb), S = ssum(S)),
+  by = .(region)
+  ]
+TBregB[, Sex := "Both"]
+TBreg <- rbind(TBregS, TBregB)
+
+TBG <- TB[, .(tb = sum(tb), S = ssum(S)),
+  by = .(Sex = ifelse(sex == "f", "Women", "Men"))
+  ]
+TBGB <- TB[, .(tb = sum(tb), S = ssum(S))]
+TBGB[, Sex := "Both"]
+TBG <- rbind(TBG, TBGB)
+TBG[, region := "Global"]
+TBreg <- rbind(TBreg, TBG)
+
+## merge in
+RRbySRT <- merge(RRbySR, TBreg, by = c("region", "Sex"))
+RRbySRT[, tbr.mid := value * tb]
+RRbySRT[, tbr.lo := value * (tb - 1.96 * S)]
+RRbySRT[, tbr.hi := value * (tb + 1.96 * S)]
+RRbySRT[, txt := brkt(rf(tbr.mid), rf(tbr.lo), rf(tbr.hi))]
+
+## reshape & order
+tab <- dcast(data = RRbySRT, region ~ variable + Sex, value.var = "txt")
+setcolorder(
+  tab,
+  c(
+    "region",
+    "BMI = 17_Men", "BMI = 17_Women", "BMI = 17_Both",
+    "BMI = 18.5_Men", "BMI = 18.5_Women", "BMI = 18.5_Both"
+  )
+)
+tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
+setkey(tab,region)
+
+fwrite(tab, file = here("output/table1.csv"))
 
 ## country lopoffs
 RRbyC <- DRB[Year == 2022, .(
