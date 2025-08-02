@@ -53,7 +53,14 @@ B[, unique(Year)] # both 1990 - 2022
 A[ISO == "AFG" & Year == 2022]
 
 ## available for all
-A[, table(Year, is.na(`Prevalence of BMI < -2SD (thinness) lower 95% uncertainty interval`))]
+A[
+  ,
+  table(
+    Year,
+    is.na(`Prevalence of BMI < -2SD (thinness) lower 95% uncertainty interval`)
+  )
+]
+
 
 ## restrict data
 DR <- A[Year == 2022] # so the distribution info is available before 2017
@@ -71,7 +78,8 @@ tgt <- nnmz[-c(1:4)] # targets
 ## --- adolescents
 
 ## fit to gamma
-gammaStats <- function(k, theta,
+gammaStats <- function(k,
+                       theta,
                        b2112 # BMI refs for +2,+1,-1,-2 SD
 ) {
   sts <- c(
@@ -109,11 +117,18 @@ gamErr(c(0, 0), TGT, ba5)
 ## optimize
 (out <- optim(par = c(0, 0), fn = function(x) gamErr(x, TGT, ba5)))
 exp(out$par)
-gammaStats(exp(out$par[1]),exp(out$par[2]),ba5)
+gammaStats(exp(out$par[1]), exp(out$par[2]), ba5)
 TGT
 
 ## check
-curve(dgamma(x, shape = exp(out$par[1]), scale = exp(out$par[2])), from = 10, to = 30, n = 1e3)
+curve(
+  dgamma(x,
+    shape = exp(out$par[1]),
+    scale = exp(out$par[2])
+  ),
+  from = 10, to = 30, n = 1e3
+)
+
 
 ##  ---apply this fitting across the data:
 ## common age to merge with WHO REFs
@@ -186,16 +201,22 @@ AgammaStats <- function(k, theta) {
   sts <- c(
     pgamma(18.5, shape = k, scale = theta), # low tails:  <= 18.5
     1 - pgamma(30, shape = k, scale = theta), # high tails: >= 30
-    pgamma(20, shape = k, scale = theta) - pgamma(18.5, shape = k, scale = theta), # intervals
-    pgamma(25, shape = k, scale = theta) - pgamma(20, shape = k, scale = theta), # intervals
-    pgamma(30, shape = k, scale = theta) - pgamma(25, shape = k, scale = theta), # intervals
-    pgamma(35, shape = k, scale = theta) - pgamma(30, shape = k, scale = theta), # intervals
-    pgamma(40, shape = k, scale = theta) - pgamma(35, shape = k, scale = theta), # intervals
+    pgamma(20, shape = k, scale = theta) -
+      pgamma(18.5, shape = k, scale = theta), # intervals
+    pgamma(25, shape = k, scale = theta) -
+      pgamma(20, shape = k, scale = theta), # intervals
+    pgamma(30, shape = k, scale = theta) -
+      pgamma(25, shape = k, scale = theta), # intervals
+    pgamma(35, shape = k, scale = theta) -
+      pgamma(30, shape = k, scale = theta), # intervals
+    pgamma(40, shape = k, scale = theta) -
+      pgamma(35, shape = k, scale = theta), # intervals
     1 - pgamma(40, shape = k, scale = theta) # high tails: >= 40
   )
   names(sts) <- tgt
   sts
 }
+
 
 ## test
 AgammaStats(2, 9)
