@@ -6,6 +6,7 @@ library(data.table)
 library(ggplot2)
 library(ggrepel)
 library(paletteer)
+library(MASS)
 
 ## load relevant data
 load(here("data/whokey.Rdata")) # WHO region to iso3 key
@@ -36,11 +37,36 @@ rf <- function(x) {
 brkt <- function(x, y, z) paste0(x, " (", y, " to ", z, ")")
 brkt(1, 2, 3)
 
-
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
-t <- -log(1.148) # risk function parameter
-exp(-t) # risk increase with 1 unit decrease
+t <- log(1-0.148) # risk function parameter
+1-exp(t) # risk increase with 1 unit decrease
+
+## fits from bilinar model
+C <- fread(here("data/general_population_piecewise_parameters.csv"))
+D <- fread(here("data/general_population_vcov_matrix.csv"))
+## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
+exp(C$Value[4:5]) # corresponds to above
+mut <- C$Value[4:5]
+t1 <- mut[1]
+t2 <- mut[2]
+V <- as.matrix(D[, .(slope_below_breakpoint, slope_change_above_breakpoint)])
+## slope_change_above_breakpoint
+## slope above = slope below + change
+## a = b + c
+## cov(b,a) = cov(b,b+c) = cov(b,c) + var(b,b)
+## cov(a,a) = cov(b+c,b+c) = var(b) + var(c) + 2*cov(b,c)
+W <- V
+W[2, 2] <- V[2, 2] + # var(c)
+  V[1, 1] + # var(b)
+  2 * V[1, 2] # cov(b,c)
+W[1, 2] <- W[2, 1] <- V[1, 2] + V[1, 1]
+## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
+## check -- OK: matches above
+S <- exp(mvrnorm(n = 1e4, mu = mut, Sigma = W))
+1e2 * (1 - colMeans(S))
+1e2 * quantile(1 - S[, 1], c(0.025, 1 - 0.025))
+1e2 * quantile(1 - S[, 2], c(0.025, 1 - 0.025))
 
 ## risk ratio calculator
 bmirefpop <- data.table(k = 25.0, theta = 1.0) #for testing
@@ -60,7 +86,6 @@ RRfun(24, 0.7, t) # OK
 ## see: https://search.r-project.org/CRAN/refmans/expint/html/gammainc.html
 ## Γ(a,x)=Γ(a)(1−P(a,x))
 ## https://search.r-project.org/R/refmans/stats/html/GammaDist.html
-t1 <- t2 <- t
 RRfunBL0 <- function(k, theta, t1, t2) {
   x0 <- 25
   a1 <- -t1
@@ -99,12 +124,6 @@ mean(exp(BL(bmi1, t1, t1))) / mean(exp(BL(bmi0, t1, t1)))
 mean(exp(t1 * (bmi1 - 30))) / mean(exp(t1 * (bmi0 - 30)))
 RRfunBL0(24, 0.7, t1, t1) / RRfunBL0(bmirefpop$k, bmirefpop$theta, t1, t1)
 RRfunBL(24, 0.7, t1, t1)
-
-## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
-t1 <- -log(1.18) # risk function parameter
-exp(-t1) # risk increase with 1 unit decreast
-t2 <- -log(1.069) # risk function parameter
-exp(-t2) # risk increase with 1 unit decreast
 
 mean(exp(BL(bmi1, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
 RRfunBL(24, 0.7, t1, t2) ## OK
@@ -257,44 +276,68 @@ RRlopoff <- function(k, theta, t1, t2, L) {
   RRlopoff0(k, theta, t1, t2, L) /
     RRlopoff0(bmirefpop$k, bmirefpop$theta, t1, t2, 0)
 }
-
-
 ## ## test
 ## RRlopoff(24,0.7,t1,t1,0)
 ## RRlopoff(24,0.7,t1,t1,17)
+## RRlopoff(rep(24,10),rep(0.7,10),rep(t1,10),rep(t1,10),rep(17,10))
+
+## --- uncertainty
+eps <- 0.025
+## make long version
+Nrep <- 1000 #number of reps
+DRBL <- DRB[rep(1:nrow(DRB), each = Nrep)]
+DRBL[, iter := rep(1:Nrep, nrow(DRB))]
+t1t2 <- mvrnorm(n = nrow(DRBL), mu = mut, Sigma = W)
+## check
+head(t1t2)
+t1
+t2
+
 ## compute values:
-DRB[, RR0 := RRlopoff(k, theta, t1, t2, 0)]
-DRB[, RR17 := RRlopoff(k, theta, t1, t2, 17)]
-DRB[, RR18.5 := RRlopoff(k, theta, t1, t2, 18.5)]
+DRBL[, RR0 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 0)]
+DRBL[, RR17 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 17)]
+DRBL[, RR18.5 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 18.5)]
 
 
-RRbyAS <- DRB[Year == 2022, .(
+RRbyAS <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, age)]
+), by = .(Sex, age, iter)]
 RRbyAS[, RR17 := RR17 / RR0]
 RRbyAS[, RR18.5 := RR18.5 / RR0]
 
 RRbyAS <- melt(
-  RRbyAS[, .(Sex, age,
+  RRbyAS[, .(Sex, age, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex", "age")
+  id = c("Sex", "age", "iter")
 )
+
+RRbyAS <- RRbyAS[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, age, variable)
+]
 
 
 
 ## by age and sex
-ggplot(RRbyAS, aes(age, value, fill = variable)) +
+ggplot(RRbyAS, aes(age, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+)) +
   geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
   theme_linedraw() +
   scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
   facet_wrap(~Sex) +
   ylab("Reduction in global TB incidence in group") +
   xlab("Age") +
-  scale_fill_paletteer_d("PrettyCols::Bright")+
+  scale_fill_paletteer_d("PrettyCols::Bright") +
   theme(
     legend.position = "top",
     legend.title = element_blank(),
@@ -305,30 +348,39 @@ ggplot(RRbyAS, aes(age, value, fill = variable)) +
 ggsave(here("output/RR_age_sex_lopoff.png"), w = 12, h = 5)
 
 
-
 ## by age and sex
-RRbyASR <- DRB[Year == 2022, .(
+RRbyASR <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
 ),
-by = .(Sex, age, g_whoregion)
+by = .(Sex, age, g_whoregion, iter)
 ]
 RRbyASR[, RR17 := RR17 / RR0]
 RRbyASR[, RR18.5 := RR18.5 / RR0]
 RRbyASR <- melt(
-  RRbyASR[, .(Sex, age, g_whoregion,
+  RRbyASR[, .(Sex, age, g_whoregion, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex", "age", "g_whoregion")
+  id = c("Sex", "age", "g_whoregion", "iter")
 )
 
-
+RRbyASR <- RRbyASR[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, age, g_whoregion, variable)
+]
 
 ## by age and sex
-ggplot(RRbyASR, aes(age, value, fill = variable)) +
+ggplot(RRbyASR, aes(age, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+)) +
   geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
   theme_linedraw() +
   facet_grid(g_whoregion ~ Sex) +
   scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
@@ -344,44 +396,61 @@ ggplot(RRbyASR, aes(age, value, fill = variable)) +
 ggsave(here("output/RR_age_sex_reg_lopoff.png"), w = 12, h = 15)
 
 
-
 ## by region and sex
-RRbySR <- DRB[Year == 2022, .(
+RRbySR <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, g_whoregion)]
+), by = .(Sex, g_whoregion, iter)]
 RRbySR[, RR17 := RR17 / RR0]
 RRbySR[, RR18.5 := RR18.5 / RR0]
 RRbySR <- melt(
-  RRbySR[, .(Sex, g_whoregion,
+  RRbySR[, .(Sex, g_whoregion, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex", "g_whoregion")
+  id = c("Sex", "g_whoregion", "iter")
 )
 
+RRbySR <- RRbySR[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, g_whoregion, variable)
+]
 
 ## sex globall
-RRbySG <- DRB[Year == 2022, .(
+RRbySG <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex)]
+), by = .(Sex, iter)]
 RRbySG[, RR17 := RR17 / RR0]
 RRbySG[, RR18.5 := RR18.5 / RR0]
 RRbySG <- melt(
-  RRbySG[, .(Sex,
+  RRbySG[, .(Sex, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex")
+  id = c("Sex", "iter")
 )
 RRbySG[, g_whoregion := NA]
 
+RRbySG <- RRbySG[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, g_whoregion, variable)
+]
+
 ## by region and sex
-ggplot(RRbySR, aes(g_whoregion, value, fill = variable)) +
+ggplot(RRbySR, aes(g_whoregion, value,
+                     ymin = lo, ymax = hi,
+                   fill = variable)) +
   geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
   geom_hline(data = RRbySG, aes(yintercept = value, lty = variable), col = 2) +
   theme_linedraw() +
   facet_grid(~Sex) +
@@ -399,51 +468,66 @@ ggsave(here("output/RR_sex_reg_lopoff.png"), w = 12, h = 5)
 
 ## --- version 2
 ## by region and sex
-RRbySR <- DRB[Year == 2022, .(
+RRbySR <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-  ), by = .(Sex, g_whoregion)]
-RRbySRb <- DRB[Year == 2022, .(
+), by = .(Sex, g_whoregion, iter)]
+RRbySRb <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-  ), by = .(g_whoregion)]
+), by = .(g_whoregion, iter)]
 RRbySRb[, Sex := "Both"]
 RRbySR <- rbind(RRbySR, RRbySRb)
 RRbySR[, RR17 := RR17 / RR0]
 RRbySR[, RR18.5 := RR18.5 / RR0]
 RRbySR <- melt(
-  RRbySR[, .(Sex, g_whoregion,
+  RRbySR[, .(Sex, g_whoregion, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex", "g_whoregion")
+  id = c("Sex", "g_whoregion", "iter")
 )
 
+RRbySR <- RRbySR[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, g_whoregion, variable)
+]
+
 ## sex globall
-RRbySG <- DRB[Year == 2022, .(
+RRbySG <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-  ), by = .(Sex)]
-RRbySGb <- DRB[Year == 2022, .(
+), by = .(Sex, iter)]
+RRbySGb <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb)
-)]
+), by = iter]
 RRbySGb[, Sex := "Both"]
 RRbySG <- rbind(RRbySG, RRbySGb)
 RRbySG[, RR17 := RR17 / RR0]
 RRbySG[, RR18.5 := RR18.5 / RR0]
 RRbySG <- melt(
-  RRbySG[, .(Sex,
+  RRbySG[, .(Sex, iter,
     `BMI = 17` = 1 - RR17,
     `BMI = 18.5` = 1 - RR18.5
   )],
-  id = c("Sex")
+  id = c("Sex", "iter")
 )
 RRbySG[, g_whoregion := "Global"]
+RRbySG <- RRbySG[, .(
+  value = mean(value),
+  lo = quantile(value, eps),
+  hi = quantile(value, 1 - eps)
+),
+by = .(Sex, g_whoregion, variable)
+]
 RRbySR <- rbind(RRbySR, RRbySG) # join
 
 
@@ -459,13 +543,16 @@ lvls <- c(lvls[-5], "Global")
 RRbySR$region <- factor(RRbySR$region, levels = rev(lvls), ordered = TRUE)
 
 
-
 ## by region and sex
-ggplot(RRbySR, aes(region, value, fill = variable)) +
+ggplot(RRbySR, aes(region, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+)) +
   geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
   theme_linedraw() +
-  facet_grid(Sex~.)+
-  coord_flip()+
+  facet_grid(Sex ~ .) +
+  coord_flip() +
   scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
   ylab("Reduction in tuberculosis incidence") +
   xlab("Region") +
@@ -499,7 +586,12 @@ TBreg <- rbind(TBreg, TBG)
 
 ## merge in
 RRbySRT <- merge(RRbySR, TBreg, by = c("region", "Sex"))
-RRbySRT[, tbr.mid := value * tb]
+RRbySRT[, tbr.mid := value * tb] #dA/A = dB/B + dC/C
+RRbySRT[
+  ,
+  S := tbr.mid * sqrt((S / tb)^2 + ((hi - lo) / (3.92 * value))^2)
+] # fold in value uncertainty
+
 RRbySRT[, tbr.lo := value * (tb - 1.96 * S)]
 RRbySRT[, tbr.hi := value * (tb + 1.96 * S)]
 RRbySRT[, txt := brkt(rf(tbr.mid), rf(tbr.lo), rf(tbr.hi))]

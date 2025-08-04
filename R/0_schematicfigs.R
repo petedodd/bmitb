@@ -6,6 +6,7 @@ library(rvg)
 ## 'data' for these plots
 bmirefpop <- data.table(k = 25.0, theta = 1.0) # for testing
 ## Saunders et al@ risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
+## approx versions
 t <- -log(1.148) # risk function parameter
 t1 <- -log(1.18) # risk function parameter
 exp(-t1) # risk increase with 1 unit decreast
