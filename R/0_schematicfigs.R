@@ -1,17 +1,26 @@
 ## schematic figures
+library(here)
 library(ggplot2)
+library(data.table)
 library(officer)
 library(rvg)
 
+## this block from 2_...
+## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
+t <- log(1 - 0.148) # risk function parameter
+1 - exp(t) # risk increase with 1 unit decrease
+## fits from bilinear model
+C <- fread(here("data/general_population_piecewise_parameters.csv"))
+D <- fread(here("data/general_population_vcov_matrix.csv"))
+## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
+exp(C$Value[4:5]) # corresponds to above
+mut <- C$Value[4:5]
+t1 <- mut[1]
+t2 <- mut[2]
+
+
 ## 'data' for these plots
 bmirefpop <- data.table(k = 25.0, theta = 1.0) # for testing
-## Saunders et al@ risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
-## approx versions
-t <- -log(1.148) # risk function parameter
-t1 <- -log(1.18) # risk function parameter
-exp(-t1) # risk increase with 1 unit decreast
-t2 <- -log(1.069) # risk function parameter
-exp(-t2) # risk increase with 1 unit decreast
 BL <- function(x, t1, t2) {
   ans <- (x - 25)
   less <- ans < 0

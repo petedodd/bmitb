@@ -42,7 +42,7 @@ brkt(1, 2, 3)
 t <- log(1-0.148) # risk function parameter
 1-exp(t) # risk increase with 1 unit decrease
 
-## fits from bilinar model
+## fits from bilinear model
 C <- fread(here("data/general_population_piecewise_parameters.csv"))
 D <- fread(here("data/general_population_vcov_matrix.csv"))
 ## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
@@ -54,7 +54,7 @@ V <- as.matrix(D[, .(slope_below_breakpoint, slope_change_above_breakpoint)])
 ## slope_change_above_breakpoint
 ## slope above = slope below + change
 ## a = b + c
-## cov(b,a) = cov(b,b+c) = cov(b,c) + var(b,b)
+## cov(b,a) = cov(b,b+c) = cov(b,c) + var(b)
 ## cov(a,a) = cov(b+c,b+c) = var(b) + var(c) + 2*cov(b,c)
 W <- V
 W[2, 2] <- V[2, 2] + # var(c)
