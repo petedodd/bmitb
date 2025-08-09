@@ -682,6 +682,8 @@ ggplot(RRbySR, aes(region, value,
 
 ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
 ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6)
+fwrite(RRbySR, file = here("output/RRbySR.csv"))
+
 
 ## first go at table output
 TBreg <- merge(TB, whokey, by = "iso3")
