@@ -347,6 +347,56 @@ ggplot(RRbyAS, aes(age, value,
 
 ggsave(here("output/RR_age_sex_lopoff.png"), w = 12, h = 5)
 
+## by age and sex
+ggplot(RRbyAS, aes(age, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+)) +
+  coord_flip() +
+  geom_col(
+    data = RRbyAS[Sex == "Women"],
+    width = 1, position = "dodge",
+    aes(y = -value)
+  ) +
+  geom_col(
+    data = RRbyAS[Sex == "Men"],
+    width = 1, position = "dodge",
+    aes(y = value)
+  ) +
+  geom_errorbar(
+    data = RRbyAS[Sex == "Women"],
+    aes(ymin = -lo, ymax = -hi),
+    col = 2, width = 0,
+    position = position_dodge(width = 1)
+  ) +
+  geom_errorbar(
+    data = RRbyAS[Sex == "Men"],
+    aes(ymin = lo, ymax = hi),
+    col = 2, width = 0,
+    position = position_dodge(width = 1)
+  ) +
+  theme_linedraw() +
+  scale_y_continuous(labels = function(x) scales::percent(abs(x))) +
+  geom_hline(yintercept = 0, col = 2) +
+  annotate(
+    y = -0.4, x = 10,
+    label = "atop(italic('female'))", geom = "text", parse = TRUE
+  ) +
+  annotate(
+    y = +0.4, x = 10,
+    label = "atop(italic('male'))", geom = "text", parse = TRUE
+  ) +
+  ylab("Reduction in global tuberculosis incidence in group") +
+  xlab("Age") +
+  scale_fill_paletteer_d("PrettyCols::Bright") +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank()
+  )
+
+ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
+ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5)
+
 
 ## by age and sex
 RRbyASR <- DRBL[Year == 2022, .(
@@ -394,6 +444,57 @@ ggplot(RRbyASR, aes(age, value,
   )
 
 ggsave(here("output/RR_age_sex_reg_lopoff.png"), w = 12, h = 15)
+
+
+## by age and sex
+ggplot(RRbyASR, aes(age, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+  )) +
+  facet_wrap(~g_whoregion)+
+  coord_flip() +
+  geom_col(
+    data = RRbyASR[Sex == "Women"],
+    width = 1, position = "dodge",
+    aes(y = -value)
+  ) +
+  geom_col(
+    data = RRbyASR[Sex == "Men"],
+    width = 1, position = "dodge",
+    aes(y = value)
+  ) +
+  geom_errorbar(
+    data = RRbyASR[Sex == "Women"],
+    aes(ymin = -lo, ymax = -hi),
+    col = 2, width = 0,
+    position = position_dodge(width = 1)
+  ) +
+  geom_errorbar(
+    data = RRbyASR[Sex == "Men"],
+    aes(ymin = lo, ymax = hi),
+    col = 2, width = 0,
+    position = position_dodge(width = 1)
+  ) +
+  theme_linedraw() +
+  scale_y_continuous(labels = function(x) scales::percent(abs(x))) +
+  geom_hline(yintercept = 0, col = 2) +
+  annotate(
+    y = -0.55, x = 4,
+    label = "atop(italic('female'))", geom = "text", parse = TRUE
+  ) +
+  annotate(
+    y = +0.55, x = 4,
+    label = "atop(italic('male'))", geom = "text", parse = TRUE
+  ) +
+  ylab("Reduction in global TB incidence in group") +
+  xlab("Age") +
+  scale_fill_paletteer_d("PrettyCols::Bright") +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank()
+  )
+
+ggsave(here("output/RR_age_sex_reg_lopoff_flip.png"), w = 15, h = 10)
 
 
 ## by region and sex
@@ -563,6 +664,7 @@ ggplot(RRbySR, aes(region, value,
   )
 
 ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
+ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6)
 
 ## first go at table output
 TBreg <- merge(TB, whokey, by = "iso3")
@@ -612,15 +714,21 @@ setkey(tab,region)
 fwrite(tab, file = here("output/table1.csv"))
 
 ## country lopoffs
-RRbyC <- DRB[Year == 2022, .(
+RRbyC <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb),
   tb = sum(tb)
 ),
-by = .(iso3, g_whoregion)
+by = .(iso3, g_whoregion, iter)
 ]
 RRbyC[, RR18.5 := RR18.5 / RR0]
+RRbyC <- RRbyC[, .(
+  RR18.5 = mean(RR18.5),
+  tb = mean(tb)
+),
+by = .(iso3, g_whoregion)
+]
 der <- RRbyC[, order(RR18.5, tb, decreasing = TRUE)]
 RRbyC$iso3 <- factor(RRbyC$iso3, levels = RRbyC$iso3[der], ordered = TRUE)
 RRbyC[, redn := 1 - RR18.5]
@@ -639,11 +747,22 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
 
 ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
+## TODO uncertainty version with text output
+fwrite(RRbyC[redn > 0.25], file = here("output/gt25pc.csv"))
+write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
+  file = here("output/gt25pc_tab.csv")
+)
 
 
 ## === map plots
 library(sf)
 library(wbmapdata) ## https://github.com/petedodd/wbmapdata
+library(cartogram)
+library(tmap)
+
+data("World") # tmap version for cartogram
+RRbyC[, iso_a3 := iso3] #to merge with above
+RRbyC[, tbredn := tb * redn]
 
 ## merge in
 MPD <- sp::merge(RRbyC, world, by = "iso3")
@@ -651,7 +770,7 @@ MPD <- sp::merge(RRbyC, world, by = "iso3")
 ## convert & add mid-coords
 MP <- st_as_sf(MPD)
 
-##  version
+##  version without points
 sznm <- "Reduction in tuberculosis incidence (thousands)"
 p <- ggplot(data = MP) +
   geom_sf(aes(fill = 1e2 * redn)) +
@@ -660,22 +779,13 @@ p <- ggplot(data = MP) +
     na.value = "grey", trans = "sqrt",
     palette = "Reds", direction = 1
   ) +
-  geom_sf(
-    aes(
-      geometry = mid,
-      size = as.numeric(redn * tb / 1e3)
-    ),
-    show.legend = "point",
-    shape = 1
-  ) +
-  scale_size_continuous(name = sznm) +
   theme_minimal() +
   theme(
     legend.position = "right",
     legend.title.align = 0.5,
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
-    legend.key.width  = unit(2, "lines"),
+    legend.key.width = unit(2, "lines"),
     legend.key.height = unit(1, "lines")
   ) +
   guides(
@@ -684,4 +794,56 @@ p <- ggplot(data = MP) +
   )
 p
 
+ggsave(p, file = here("output/RR_lopoff_map_nopoint.png"), w = 12, h = 10)
+
+
+## version with points
+p <- p +
+  geom_sf(
+    aes(
+      geometry = mid,
+      size = as.numeric(redn * tb / 1e3)
+    ),
+    show.legend = "point",
+    shape = 1
+  ) +
+  scale_size_continuous(name = sznm)
+p
+
 ggsave(p, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
+
+
+## cartogram
+
+## merge in
+MPD2 <- sp::merge(RRbyC, World, by = "iso_a3")
+## convert & add mid-coords
+MP2 <- st_as_sf(MPD2)
+MPC <- st_transform(MP2, 3857) # convert coords
+## NOTE a little slow:
+MPC <- cartogram_cont(MPC, "tbredn") # TODO check redn!
+MPC <- st_transform(MPC, st_crs(MP2)) # convert back
+
+cp <- ggplot(data = MPC) +
+  geom_sf(aes(fill = 1e2 * redn)) +
+  scale_fill_distiller(
+    name = "Reduction in tuberculosis incidence (%)",
+    na.value = "grey", trans = "sqrt",
+    palette = "Reds", direction = 1
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.title.align = 0.5,
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    legend.key.width = unit(2, "lines"),
+    legend.key.height = unit(1, "lines")
+  ) +
+  guides(
+    fill = guide_colourbar(order = 1, position = "top")
+  )
+cp
+
+ggsave(cp, file = here("output/RR_lopoff_cart.png"), w = 12, h = 10)
+
