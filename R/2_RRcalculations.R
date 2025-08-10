@@ -153,6 +153,10 @@ mean(bmi0)
 exp(t * (mean(bmi1) - mean(bmi0)))
 RRfun(24, 0.7, t) # about as good as one might expect
 
+## statistics to report
+outstats <- list()
+ok <- 1
+
 ## merge against TB estimates
 ## restrict:  "15-24" included
 TB <- TB[
@@ -755,6 +759,130 @@ DRB[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
 DRB[, pop17 := prop17 * pop]
 DRB[, pop18.5 := prop18.5 * pop]
 
+## country stats for inclusion in
+BbyC <- DRB[,
+  .(
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(iso3)
+  ]
+BbyC[, c("prop17", "prop18.5") := .(
+  1e2 * pop17 / pop, 1e2 * pop18.5 / pop
+)]
+
+tmp <- BbyC[, .(
+  pc17.med = round(median(prop17), 1),
+  pc17.lq = round(quantile(prop17, 0.25), 1),
+  pc17.uq = round(quantile(prop17, 0.75), 1),
+  pc18.5.med = round(median(prop18.5), 1),
+  pc18.5.lq = round(quantile(prop18.5, 0.25), 1),
+  pc18.5.uq = round(quantile(prop18.5, 0.75), 1)
+)]
+
+tmp <- data.table(quantity = names(tmp), value = transpose(tmp)$V1)
+outstats[[ok]] <- tmp
+ok <- ok + 1
+
+## age only
+BbyAG <- DRB[,
+  .(
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(age)
+]
+BbyAG[, c("prop17", "prop18.5") := .(
+  1e2 * pop17 / pop, 1e2 * pop18.5 / pop
+)]
+
+tmp <- BbyAG[, .(
+  pa17.med = round(median(prop17), 1),
+  pa17.lq = round(quantile(prop17, 0.25), 1),
+  pa17.uq = round(quantile(prop17, 0.75), 1),
+  pa18.5.med = round(median(prop18.5), 1),
+  pa18.5.lq = round(quantile(prop18.5, 0.25), 1),
+  pa18.5.uq = round(quantile(prop18.5, 0.75), 1)
+)]
+tmp <- data.table(quantity = names(tmp), value = transpose(tmp)$V1)
+outstats[[ok]] <- tmp
+ok <- ok + 1
+
+## age patterns
+BbyARS <- DRB[,
+  .(
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(age, g_whoregion, Sex)
+]
+BbyAGS <- DRB[,
+  .(
+    g_whoregion = "Global",
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(age, Sex)
+]
+BbyAS <- rbind(BbyARS, BbyAGS)
+BbyAS <- merge(BbyAS, whokeyshort, by = "g_whoregion")
+BbyAS$region <- factor(BbyAS$region,
+  levels = c(whozt, "Global"),
+  ordered = TRUE
+)
+BbyAS[, `Proportion BMI<=17` := pop17 / pop]
+BbyAS[, `Proportion BMI<=18.5` := pop18.5 / pop]
+BbyASM <- melt(
+  BbyAS[, .(
+    region, age, Sex,
+    `Proportion BMI<=17`,
+    `Proportion BMI<=18.5`
+  )],
+  id = c("region", "Sex", "age")
+)
+BbyASM[, variable := gsub("Proportion ", "", variable)]
+
+
+## plot
+ggplot(
+  BbyASM,
+  aes(
+    x = age,
+    y = value,
+    col = region,
+    lty = variable,
+    group = paste0(variable, region, Sex)
+  )
+) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Sex) +
+  theme_linedraw() +
+  scale_color_paletteer_d("ggthemes::Tableau_10") +
+  scale_y_sqrt(label = scales::percent) +
+  xlab("Age group (years)") +
+  ylab("Proportion of group (square root scale)") +
+  guides(
+    colour = guide_legend(position = "top"),
+    lty = guide_legend(position = "right")
+  ) +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+
+ggsave(here("output/BMI_reg_age_sex.png"), w = 10, h = 5)
+fwrite(BbyASM, file = here("output/BbyASM.csv"))
+
+
+
+## global/regional table output
 BbyRS <- DRB[,
   .(
     pop17 = sum(pop17),
@@ -858,6 +986,11 @@ fwrite(RRbyC[redn > 0.25], file = here("output/gt25pc.csv"))
 write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
   file = here("output/gt25pc_tab.csv")
 )
+
+## === record output stats
+outstats <- rbindlist(outstats) # gather
+
+fwrite(outstats, file = here("output/outstats.csv"))
 
 
 ## === map plots

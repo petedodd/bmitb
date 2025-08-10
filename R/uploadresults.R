@@ -29,3 +29,6 @@ upload.to.sheets("atable_BMI.csv", shid)
 upload.to.sheets("gt25pc_tab.csv", shid)
 upload.to.sheets("gt25pc.csv", shid)
 upload.to.sheets("RRbySR.csv", shid)
+
+upload.to.sheets("BbyASM.csv", shid)
+upload.to.sheets("outstats.csv", shid)
