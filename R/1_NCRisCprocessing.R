@@ -16,9 +16,9 @@ library(ggplot2)
 ## === WHO refs for children
 ## want to know: BMIs for z scores -2,-1,+1,+2 in ref pop for sex and age
 ## from: https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age
-fn <- here("data/bmi-boys-z-who-2007-exp.xlsx")
+fn <- here("rawdata/bmi-boys-z-who-2007-exp.xlsx")
 WB <- read_excel(fn)
-fn <- here("data/bmi-girls-z-who-2007-exp.xlsx")
+fn <- here("rawdata/bmi-girls-z-who-2007-exp.xlsx")
 WG <- read_excel(fn)
 WB <- as.data.table(WB)
 WG <- as.data.table(WG)

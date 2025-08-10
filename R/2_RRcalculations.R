@@ -12,8 +12,9 @@ library(MASS)
 load(here("data/whokey.Rdata")) # WHO region to iso3 key
 load(here("data/DRA.Rdata")) # ado BMI distributions
 load(here("data/DRB.Rdata")) # adult BMI distributions
+load(here("rawdata/N8523.Rdata")) # 2023 demography
 
-TB <- fread(here("data/TB_burden_age_sex_2024-10-30.csv"))
+TB <- fread(here("rawdata/TB_burden_age_sex_2024-10-30.csv"))
 TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
 whozt <- c(
@@ -29,8 +30,9 @@ whokeyshort <- rbind(
   whokeyshort,
   data.table(g_whoregion = "Global", region = "Global")
 )
-
+## uncertainty aggregation
 ssum <- function(x) sqrt(sum(x^2))
+## output formatting
 rf <- function(x) {
   dg <- ifelse(abs(x) > 0.01 & abs(x) < 100, 2, 3)
   x2 <- signif(x, dg)
@@ -684,8 +686,7 @@ ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
 ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6)
 fwrite(RRbySR, file = here("output/RRbySR.csv"))
 
-
-## first go at table output
+## === incidence reduction table
 TBreg <- merge(TB, whokey, by = "iso3")
 TBregS <- TBreg[, .(tb = sum(tb), S = ssum(S)),
   by = .(region, Sex = ifelse(sex == "f", "Women", "Men"))
@@ -728,9 +729,95 @@ setcolorder(
   )
 )
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
-setkey(tab,region)
+setkey(tab, region)
 
 fwrite(tab, file = here("output/table1.csv"))
+
+## === appendix tables on BMI
+N8523[AgeGrp == "85+", AgeGrp := "85plus"]
+N8523 <- melt(
+  N8523[, .(iso3, PopMale, PopFemale, AgeGrp)],
+  id = c("iso3", "AgeGrp")
+)
+N8523[, Sex := ifelse(grepl("Female", variable), "Women", "Men")]
+N8523 <- N8523[
+  !AgeGrp %in% c("0-4", "5-9", "10-14"),
+  .(iso3, Sex, age = AgeGrp, pop = value)
+]
+N8523[, sum(pop)] / 1e3 #6 Bn without <15s
+
+## merge
+DRB <- merge(DRB, N8523, by = c("iso3", "Sex", "age"))
+
+## calculations
+DRB[, prop17 := pgamma(17, shape = k, scale = theta)]
+DRB[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
+DRB[, pop17 := prop17 * pop]
+DRB[, pop18.5 := prop18.5 * pop]
+
+BbyRS <- DRB[,
+  .(
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(g_whoregion, Sex)
+]
+BbyR <- DRB[,
+  .(
+    Sex = "Both",
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(g_whoregion)
+]
+BbyGS <- DRB[,
+  .(
+    g_whoregion = "Global",
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  ),
+  by = .(Sex)
+]
+BbyG <- DRB[
+  ,
+  .(
+    Sex = "Both",
+    g_whoregion = "Global",
+    pop17 = sum(pop17),
+    pop18.5 = sum(pop18.5),
+    pop = sum(pop)
+  )
+]
+BbyX <- rbindlist(list(BbyRS, BbyR, BbyGS, BbyG),
+  use.names = TRUE
+)
+BbyX[, c("prop17", "prop18.5") := .(
+  round(1e2 * pop17 / pop, 1), round(1e2 * pop18.5 / pop, 1)
+)]
+BbyX[, c("txt17", "txt18.5") := .(
+  paste0(rf(pop17), " (", prop17, "%)"),
+  paste0(rf(pop18.5), " (", prop18.5, "%)")
+)]
+BbyX <- merge(BbyX, whokeyshort, by = "g_whoregion")
+
+
+## reshape & order
+tab <- dcast(data = BbyX, region ~ Sex, value.var = c("txt17", "txt18.5"))
+tab <- tab[, .(region,
+  `Men, BMI<=17` = txt17_Men,
+  `Women, BMI<=17` = txt17_Women,
+  `Both, BMI<=17` = txt17_Both,
+  `Men, BMI<=18.5` = txt18.5_Men,
+  `Women, BMI<=18.5` = txt18.5_Women,
+  `Both, BMI<=18.5` = txt18.5_Both
+)]
+tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
+setkey(tab, region)
+
+fwrite(tab, file = here("output/atable_BMI.csv"))
 
 ## country lopoffs
 RRbyC <- DRBL[Year == 2022, .(
