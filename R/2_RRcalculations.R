@@ -14,8 +14,8 @@ load(here("data/DRA.Rdata")) # ado BMI distributions
 load(here("data/DRB.Rdata")) # adult BMI distributions
 load(here("rawdata/N8523.Rdata")) # 2023 demography
 
+TBN <- fread("rawdata/TB_notifications_2024-10-30.csv")
 TB <- fread(here("rawdata/TB_burden_age_sex_2024-10-30.csv"))
-TBT <- fread(here("rawdata/TB_burden_countries_2024-10-30.csv"))
 whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
 whozt <- c(
   "Africa", "The Americas",
@@ -54,7 +54,6 @@ brkt <- function(x, y, z) {
   ans <- gsub("to[[:space:]]+", "to ", ans)
   ans
 }
-
 
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
@@ -157,6 +156,7 @@ RRfun(24, 0.7, t) # about as good as one might expect
 outstats <- list()
 ok <- 1
 
+
 ## merge against TB estimates
 ## restrict:  "15-24" included
 TB <- TB[
@@ -169,18 +169,66 @@ TB <- TB[
   )
 ]
 
-
 ## split 15-24
-## TODO notification-based split
 xtra <- TB[age == "15-24"]
-xtra[, tb := tb / 2]
-xtra[, S := S / sqrt(2)]
 xtra1 <- copy(xtra)
 xtra2 <- copy(xtra)
 xtra1[, age := "15-19"]
 xtra2[, age := "20-24"]
-xtra <- rbind(xtra1, xtra2)
-TB <- rbind(TB[age != "15-24"], xtra)
+
+## old version
+## ## even split
+## xtra1[, tb := tb / 2]
+## xtra1[, S := S / sqrt(2)]
+## xtra2[, tb := tb / 2]
+## xtra2[, S := S / sqrt(2)]
+
+## split using notifications
+TBN <- TBN[
+  year == 2023 &
+    !is.na(newrel_f1519 + newrel_f2024) &
+    !is.na(newrel_m1519 + newrel_m2024),
+  .(
+    iso3,
+    newrel_f1519, newrel_f2024,
+    newrel_m1519, newrel_m2024
+  )
+] # restrict to recent present data
+TBN <- TBN[newrel_f1519 +
+  newrel_f2024 +
+  newrel_m1519 +
+  newrel_m2024 > 100] # restrict to big TB
+## fractions of notification in groups
+TBN[, p.f := newrel_f1519 / (newrel_f1519 + newrel_f2024)]
+TBN[, p.m := newrel_m1519 / (newrel_m1519 + newrel_m2024)]
+TBN <- melt(TBN[, .(iso3, p.f, p.m)], id = "iso3")
+TBN[, sex := ifelse(grepl("m", variable), "m", "f")]
+TBN <- merge(
+  TBN[, .(iso3, sex, frac = value)],
+  xtra[, .(iso3, sex)],
+  all.x = FALSE, all.y = TRUE
+)
+TBN[ # mean for NA
+  is.na(frac) & sex == "f",
+  frac := TBN[!is.na(frac) & sex == "f", mean(frac)]
+]
+TBN[ # mean for NA
+  is.na(frac) & sex == "m",
+  frac := TBN[!is.na(frac) & sex == "m", mean(frac)]
+]
+## merge
+xtra1 <- merge(xtra1, TBN, by = c("iso3", "sex"))
+xtra2 <- merge(xtra2, TBN, by = c("iso3", "sex"))
+## split
+xtra1[, tb := tb * frac]
+xtra1[, S := S * sqrt(frac)]
+xtra2[, tb := tb * (1 - frac)]
+xtra2[, S := S * sqrt(1 - frac)]
+
+## now reassemble
+xtra <- rbind(xtra1, xtra2) # join
+xtra[, frac := NULL] # drop
+TB <- rbind(TB[age != "15-24"], xtra) #join
 TB[, unique(age)]
 
 akey <- data.table(
@@ -198,13 +246,35 @@ akey <- data.table(
 )
 akey # check
 
+## population weighting data for older TB
+oldies <- c("65-69", "70-74", "75-79", "80-84", "85+")
+PW <- N8523[AgeGrp %in% oldies]
+PW[, age := gsub("\\+", "plus", AgeGrp)]
+PW <- melt(PW[, .(iso3, age, PopMale, PopFemale)], id = c("iso3", "age"))
+PW[, sex := ifelse(grepl("F", variable), "f", "m")]
+PW[, tot := sum(value), by = .(iso3, sex)]
+PW[, frac := value / tot]
+oldies <- unique(PW$age) #use new names
 
-## weight TB evenly over duplicates
+
+## weight TB evenly over duplicates (except 65+ where ~ pop)
 TBL <- merge(TB, akey, by.x = "age", by.y = "tbage", allow.cartesian = TRUE)
 TBL[, K := .N, by = .(iso3, sex, age)]
 TBL[iso3 == "AFG"] # OK
-TBL[, tb := tb / K] # even weighting...TODO revisit
-TBL[, K := NULL]
+TBL <- merge(
+  TBL,
+  PW[, .(iso3, sex, bmage = age, frac)],
+  by = c("iso3", "sex", "bmage"),
+  all.x = TRUE, all.y = FALSE
+)
+## oldies split
+TBL[!is.na(frac), tb := tb * frac]
+TBL[!is.na(frac), S := S * sqrt(frac)]
+## other splits
+TBL[is.na(frac), tb := tb / K] # even weighting
+TBL[is.na(frac), S := S / sqrt(K)] # even weighting
+## drops
+TBL[, c("K", "frac") := NULL]
 TBL[, Sex := ifelse(sex == "m", "Men", "Women")]
 
 ## average ado
@@ -366,7 +436,8 @@ DRBL[, RR0 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 0)]
 DRBL[, RR17 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 17)]
 DRBL[, RR18.5 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 18.5)]
 
-
+## aggregate over countries
+## TODO needs uncertainty in TB here?
 RRbyAS <- DRBL[Year == 2022, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
@@ -704,7 +775,11 @@ RRbySR$g_whoregion <- factor(RRbySR$g_whoregion,
   levels = rev(c(sort(unique(whokey$g_whoregion)), "Global")),
   ordered = TRUE
   )
-RRbySR$Sex <- factor(RRbySR$Sex, levels = c("Men", "Women", "Both"), ordered = TRUE)
+RRbySR$Sex <- factor(
+  RRbySR$Sex,
+  levels = c("Men", "Women", "Both"),
+  ordered = TRUE
+)
 
 RRbySR <- merge(RRbySR, whokeyshort, by = "g_whoregion")
 lvls <- whokeyshort[order(g_whoregion)]$region
@@ -1141,7 +1216,7 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
 
 ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
-## TODO uncertainty version with text output
+## uncertainty version with text output
 fwrite(RRbyC[redn > 0.25, .(iso3, pctxt18.5)], file = here("output/gt25pc.csv"))
 write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
   file = here("output/gt25pc_tab.csv")
@@ -1156,6 +1231,7 @@ fwrite(RRbyC[, .(iso3, pctxt18.5)],
 
 ## === record output stats
 outstats <- rbindlist(outstats) # gather
+outstats
 
 fwrite(outstats, file = here("output/outstats.csv"))
 
