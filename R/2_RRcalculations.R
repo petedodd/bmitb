@@ -394,11 +394,18 @@ eps <- 0.025
 Nrep <- 1000 #number of reps
 DRBL <- DRB[rep(1:nrow(DRB), each = Nrep)]
 DRBL[, iter := rep(1:Nrep, nrow(DRB))]
-t1t2 <- mvrnorm(n = nrow(DRBL), mu = mut, Sigma = W)
+
+## risk function parametric uncertainty
+t1t2 <- mvrnorm(n = Nrep, mu = mut, Sigma = W)
 ## check
 head(t1t2)
 t1
 t2
+
+## merge
+t1t2 <- data.table(iter = 1:Nrep, t1 = t1t2[, 1], t2 = t1t2[, 2])
+DRBL <- merge(DRBL, t1t2, by = "iter")
+
 
 ## (slow ~ few mins)
 DRBL[, c("k.eps", "theta.eps") := sample_kt_noise(Vkk, Vkt, Vtt),
@@ -432,37 +439,48 @@ summary(DRBL)
 
 
 ## compute values:
-DRBL[, RR0 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 0)]
-DRBL[, RR17 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 17)]
-DRBL[, RR18.5 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 18.5)]
+DRBL[, RR0 := RRlopoff(k, theta, t1, t1, 0)]
+DRBL[, RR17 := RRlopoff(k, theta, t1, t1, 17)]
+DRBL[, RR18.5 := RRlopoff(k, theta, t1, t1, 18.5)]
 
-## aggregate over countries
-## TODO needs uncertainty in TB here?
+## --- reductions by Age and Sex
+## perfectly correlated weighting in num/den:
 RRbyAS <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
 ), by = .(Sex, age, iter)]
-RRbyAS[, RR17 := RR17 / RR0]
-RRbyAS[, RR18.5 := RR18.5 / RR0]
-
-RRbyAS <- melt(
-  RRbyAS[, .(Sex, age, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "age", "iter")
-)
-
-RRbyAS <- RRbyAS[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, age, variable)
+RRbyAS[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
+RRbyAS[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+## means/vars over sampled-sources of uncertainty
+RRbyAS <- RRbyAS[,
+  .(
+    RR17 = mean(RR17f),
+    RR17.ve = var(RR17f), #var(E[])
+    RR17.ev = mean(RR17.v),# E[var()]
+    RR18.5 = mean(RR18.5f),
+    RR18.5.ve = var(RR18.5f),
+    RR18.5.ev = mean(RR18.5.v)
+  ),
+  by = .(Sex, age)
 ]
+## total variance: var(Y) = E[var(Y|X)] + var(E[Y|X])
+RRbyAS[, RR17.tv := RR17.ev + RR17.ve]
+RRbyAS[, RR18.5.tv := RR18.5.ev + RR18.5.ve]
 
-
+## reshape
+RRbyAS <- melt(
+  RRbyAS[, .(Sex, age, RR17, RR17.tv, RR18.5, RR18.5.tv)],
+  id = c("Sex", "age")
+)
+RRbyAS[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
+RRbyAS[, variable := gsub("\\.tv", "", variable)]
+RRbyAS <- dcast(RRbyAS, Sex + age + variable ~ qty, value.var = "value")
+RRbyAS[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbyAS[, value := 1 - mid]
+RRbyAS[, lo := value - sqrt(tv) * 1.96]
+RRbyAS[, hi := value + sqrt(tv) * 1.96]
 
 ## by age and sex
 ggplot(RRbyAS, aes(age, value,
@@ -482,7 +500,6 @@ ggplot(RRbyAS, aes(age, value,
     legend.title = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
-
 
 ggsave(here("output/RR_age_sex_lopoff.png"), w = 12, h = 5)
 
@@ -537,31 +554,49 @@ ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
 ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5)
 
 
-## by age and sex
+## --- reductions by Age, Sex, Region
+## perfectly correlated weighting in num/den:
 RRbyASR <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-),
-by = .(Sex, age, g_whoregion, iter)
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
+  ), by = .(Sex, age, g_whoregion,iter)]
+RRbyASR[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
+RRbyASR[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+## means/vars over sampled-sources of uncertainty
+RRbyASR <- RRbyASR[,
+  .(
+    RR17 = mean(RR17f),
+    RR17.ve = var(RR17f), # var(E[])
+    RR17.ev = mean(RR17.v), # E[var()]
+    RR18.5 = mean(RR18.5f),
+    RR18.5.ve = var(RR18.5f),
+    RR18.5.ev = mean(RR18.5.v)
+  ),
+  by = .(Sex, age, g_whoregion)
 ]
-RRbyASR[, RR17 := RR17 / RR0]
-RRbyASR[, RR18.5 := RR18.5 / RR0]
+## total variance: var(Y) = E[var(Y|X)] + var(E[Y|X])
+RRbyASR[, RR17.tv := RR17.ev + RR17.ve]
+RRbyASR[, RR18.5.tv := RR18.5.ev + RR18.5.ve]
+## reshape
 RRbyASR <- melt(
-  RRbyASR[, .(Sex, age, g_whoregion, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "age", "g_whoregion", "iter")
+  RRbyASR[, .(Sex, age, g_whoregion, RR17, RR17.tv, RR18.5, RR18.5.tv)],
+  id = c("Sex", "age", "g_whoregion")
 )
+## calculations
+RRbyASR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
+RRbyASR[, variable := gsub("\\.tv", "", variable)]
+RRbyASR <- dcast(RRbyASR, Sex + age + g_whoregion + variable ~ qty, value.var = "value")
+RRbyASR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbyASR[, value := 1 - mid]
+RRbyASR[, lo := value - sqrt(tv) * 1.96]
+RRbyASR[, hi := value + sqrt(tv) * 1.96]
 
-RRbyASR <- RRbyASR[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, age, g_whoregion, variable)
-]
+## regions
+RRbyASR <- merge(RRbyASR, whokeyshort, by = "g_whoregion")
+lvls <- whokeyshort[order(g_whoregion)]$region
+RRbyASR$region <- factor(RRbyASR$region, levels = lvls, ordered = TRUE)
 
 ## by age and sex
 ggplot(RRbyASR, aes(age, value,
@@ -590,7 +625,7 @@ ggplot(RRbyASR, aes(age, value,
   ymin = lo, ymax = hi,
   fill = variable
   )) +
-  facet_wrap(~g_whoregion)+
+  facet_wrap(~region)+
   coord_flip() +
   geom_col(
     data = RRbyASR[Sex == "Women"],
@@ -618,11 +653,11 @@ ggplot(RRbyASR, aes(age, value,
   scale_y_continuous(labels = function(x) scales::percent(abs(x))) +
   geom_hline(yintercept = 0, col = 2) +
   annotate(
-    y = -0.4, x = 4,
+    y = -0.45, x = 4,
     label = "atop(italic('female'))", geom = "text", parse = TRUE
   ) +
   annotate(
-    y = +0.4, x = 4,
+    y = +0.45, x = 4,
     label = "atop(italic('male'))", geom = "text", parse = TRUE
   ) +
   ylab("Reduction in global TB incidence in group") +
@@ -635,142 +670,69 @@ ggplot(RRbyASR, aes(age, value,
 
 ggsave(here("output/RR_age_sex_reg_lopoff_flip.png"), w = 15, h = 10)
 
-
-## by region and sex
-RRbySR <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, g_whoregion, iter)]
-RRbySR[, RR17 := RR17 / RR0]
-RRbySR[, RR18.5 := RR18.5 / RR0]
-RRbySR <- melt(
-  RRbySR[, .(Sex, g_whoregion, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "g_whoregion", "iter")
-)
-
-RRbySR <- RRbySR[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, g_whoregion, variable)
-]
-
-## sex globall
-RRbySG <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, iter)]
-RRbySG[, RR17 := RR17 / RR0]
-RRbySG[, RR18.5 := RR18.5 / RR0]
-RRbySG <- melt(
-  RRbySG[, .(Sex, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "iter")
-)
-RRbySG[, g_whoregion := NA]
-
-RRbySG <- RRbySG[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, g_whoregion, variable)
-]
-
-## by region and sex
-ggplot(RRbySR, aes(g_whoregion, value,
-                     ymin = lo, ymax = hi,
-                   fill = variable)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
-  geom_hline(data = RRbySG, aes(yintercept = value, lty = variable), col = 2) +
-  theme_linedraw() +
-  facet_grid(~Sex) +
-  scale_y_continuous(labels = scales::percent, limits = c(0, NA)) +
-  ylab("Reduction in global TB incidence in group") +
-  xlab("WHO region") +
-  scale_fill_paletteer_d("PrettyCols::Bright") +
-  theme(
-    legend.position = "top",
-    legend.title = element_blank(),
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
-
-ggsave(here("output/RR_sex_reg_lopoff.png"), w = 12, h = 5)
-
-## --- version 2
-## by region and sex
-RRbySR <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, g_whoregion, iter)]
-RRbySRb <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
+## --- by sex and region
+## perfectly correlated weighting in num/den:
+RRbySR <- DRBL[Year == 2022, .( #sex/region
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
+  ), by = .(Sex, g_whoregion,iter)]
+RRbySRb <- DRBL[Year == 2022, .( #region
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
 ), by = .(g_whoregion, iter)]
 RRbySRb[, Sex := "Both"]
-RRbySR <- rbind(RRbySR, RRbySRb)
-RRbySR[, RR17 := RR17 / RR0]
-RRbySR[, RR18.5 := RR18.5 / RR0]
-RRbySR <- melt(
-  RRbySR[, .(Sex, g_whoregion, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "g_whoregion", "iter")
-)
-
-RRbySR <- RRbySR[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, g_whoregion, variable)
-]
-
-## sex globall
-RRbySG <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-), by = .(Sex, iter)]
-RRbySGb <- DRBL[Year == 2022, .(
-  RR0 = weighted.mean(RR0, tb),
-  RR17 = weighted.mean(RR17, tb),
-  RR18.5 = weighted.mean(RR18.5, tb)
-), by = iter]
-RRbySGb[, Sex := "Both"]
-RRbySG <- rbind(RRbySG, RRbySGb)
-RRbySG[, RR17 := RR17 / RR0]
-RRbySG[, RR18.5 := RR18.5 / RR0]
-RRbySG <- melt(
-  RRbySG[, .(Sex, iter,
-    `BMI = 17` = 1 - RR17,
-    `BMI = 18.5` = 1 - RR18.5
-  )],
-  id = c("Sex", "iter")
-)
+RRbySG <- DRBL[Year == 2022, .( #sex/global
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
+  ), by = .(Sex, iter)]
 RRbySG[, g_whoregion := "Global"]
-RRbySG <- RRbySG[, .(
-  value = mean(value),
-  lo = quantile(value, eps),
-  hi = quantile(value, 1 - eps)
-),
-by = .(Sex, g_whoregion, variable)
+RRbySGb <- DRBL[Year == 2022, .( #global
+  RR17f = sum(RR17 * tb) / sum(RR0 * tb),
+  RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
+  RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
+  RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
+  ), by = .(iter)]
+RRbySGb[, c("g_whoregion", "Sex") := .("Global", "Both")]
+RRbySR <- rbindlist(list(RRbySR, RRbySRb, RRbySG, RRbySGb), use.names = TRUE)
+
+## onward calculations
+RRbySR[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
+RRbySR[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+## means/vars over sampled-sources of uncertainty
+RRbySR <- RRbySR[,
+  .(
+    RR17 = mean(RR17f),
+    RR17.ve = var(RR17f), # var(E[])
+    RR17.ev = mean(RR17.v), # E[var()]
+    RR18.5 = mean(RR18.5f),
+    RR18.5.ve = var(RR18.5f),
+    RR18.5.ev = mean(RR18.5.v)
+  ),
+  by = .(Sex, g_whoregion)
 ]
-RRbySR <- rbind(RRbySR, RRbySG) # join
+## total variance: var(Y) = E[var(Y|X)] + var(E[Y|X])
+RRbySR[, RR17.tv := RR17.ev + RR17.ve]
+RRbySR[, RR18.5.tv := RR18.5.ev + RR18.5.ve]
+## reshape
+RRbySR <- melt(
+  RRbySR[, .(Sex, g_whoregion, RR17, RR17.tv, RR18.5, RR18.5.tv)],
+  id = c("Sex", "g_whoregion")
+)
+RRbySR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
+RRbySR[, variable := gsub("\\.tv", "", variable)]
+RRbySR <- dcast(RRbySR, Sex + g_whoregion + variable ~ qty, value.var = "value")
+RRbySR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbySR[, value := 1 - mid]
+RRbySR[, lo := value - sqrt(tv) * 1.96]
+RRbySR[, hi := value + sqrt(tv) * 1.96]
 
-
+## relevel
 RRbySR$g_whoregion <- factor(RRbySR$g_whoregion,
   levels = rev(c(sort(unique(whokey$g_whoregion)), "Global")),
   ordered = TRUE
@@ -780,14 +742,13 @@ RRbySR$Sex <- factor(
   levels = c("Men", "Women", "Both"),
   ordered = TRUE
 )
-
 RRbySR <- merge(RRbySR, whokeyshort, by = "g_whoregion")
 lvls <- whokeyshort[order(g_whoregion)]$region
 lvls <- c(lvls[-5], "Global")
 RRbySR$region <- factor(RRbySR$region, levels = rev(lvls), ordered = TRUE)
 
 
-## by region and sex
+## plot by region and sex
 ggplot(RRbySR, aes(region, value,
   ymin = lo, ymax = hi,
   fill = variable
@@ -811,39 +772,73 @@ ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6)
 fwrite(RRbySR, file = here("output/RRbySR.csv"))
 
 ## === incidence reduction table
-TBreg <- merge(TB, whokey, by = "iso3")
-TBregS <- TBreg[, .(tb = sum(tb), S = ssum(S)),
-  by = .(region, Sex = ifelse(sex == "f", "Women", "Men"))
-  ]
-TBregB <- TBreg[, .(tb = sum(tb), S = ssum(S)),
-  by = .(region)
-  ]
-TBregB[, Sex := "Both"]
-TBreg <- rbind(TBregS, TBregB)
+TBbySR <- DRBL[Year == 2022, .( # sex/region
+  tb17 = sum((1 - RR17 / RR0) * tb),
+  tb18.5 = sum((1 - RR18.5 / RR0) * tb),
+  tb17.v = sum(S^2 * (1 - RR17 / RR0)),
+  tb18.5.v = sum(S^2 * (1 - RR18.5 / RR0))
+), by = .(Sex, g_whoregion, iter)]
+TBbySRb <- DRBL[Year == 2022, .( # region
+  tb17 = sum((1 - RR17 / RR0) * tb),
+  tb18.5 = sum((1 - RR18.5 / RR0) * tb),
+  tb17.v = sum(S^2 * (1 - RR17 / RR0)),
+  tb18.5.v = sum(S^2 * (1 - RR18.5 / RR0))
+), by = .(g_whoregion, iter)]
+TBbySRb[, Sex := "Both"]
+TBbySG <- DRBL[Year == 2022, .( # sex/global
+  tb17 = sum((1 - RR17 / RR0) * tb),
+  tb18.5 = sum((1 - RR18.5 / RR0) * tb),
+  tb17.v = sum(S^2 * (1 - RR17 / RR0)),
+  tb18.5.v = sum(S^2 * (1 - RR18.5 / RR0))
+), by = .(Sex, iter)]
+TBbySG[, g_whoregion := "Global"]
+TBbySGb <- DRBL[Year == 2022, .( # global
+  tb17 = sum((1 - RR17 / RR0) * tb),
+  tb18.5 = sum((1 - RR18.5 / RR0) * tb),
+  tb17.v = sum(S^2 * (1 - RR17 / RR0)),
+  tb18.5.v = sum(S^2 * (1 - RR18.5 / RR0))
+), by = .(iter)]
+TBbySGb[, c("g_whoregion", "Sex") := .("Global", "Both")]
+TBbySR <- rbindlist(list(TBbySR, TBbySRb, TBbySG, TBbySGb), use.names = TRUE)
+## means/vars over sampled-sources of uncertainty
+TBbySR <- TBbySR[,
+  .(
+    tb17 = mean(tb17),
+    tb17.ve = var(tb17), # var(E[])
+    tb17.ev = mean(tb17.v), # E[var()]
+    tb18.5 = mean(tb18.5),
+    tb18.5.ve = var(tb18.5),
+    tb18.5.ev = mean(tb18.5.v)
+  ),
+  by = .(Sex, g_whoregion)
+]
+## total variance: var(Y) = E[var(Y|X)] + var(E[Y|X])
+TBbySR[, tb17.tv := tb17.ev + tb17.ve]
+TBbySR[, tb18.5.tv := tb18.5.ev + tb18.5.ve]
+## reshape
+TBbySR <- melt(
+  TBbySR[, .(Sex, g_whoregion, tb17, tb17.tv, tb18.5, tb18.5.tv)],
+  id = c("Sex", "g_whoregion")
+)
+TBbySR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
+TBbySR[, variable := gsub("\\.tv", "", variable)]
+TBbySR <- dcast(TBbySR, Sex + g_whoregion + variable ~ qty, value.var = "value")
+TBbySR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+TBbySR[, value := mid]
+TBbySR[, lo := value - sqrt(tv) * 1.96]
+TBbySR[, hi := value + sqrt(tv) * 1.96]
+TBbySR[lo < 0, hi := hi - lo]
+TBbySR[lo < 0, lo := 0]
+TBbySR[, txt := brkt(rf(mid), rf(lo), rf(hi))]
 
-TBG <- TB[, .(tb = sum(tb), S = ssum(S)),
-  by = .(Sex = ifelse(sex == "f", "Women", "Men"))
-  ]
-TBGB <- TB[, .(tb = sum(tb), S = ssum(S))]
-TBGB[, Sex := "Both"]
-TBG <- rbind(TBG, TBGB)
-TBG[, region := "Global"]
-TBreg <- rbind(TBreg, TBG)
-
-## merge in
-RRbySRT <- merge(RRbySR, TBreg, by = c("region", "Sex"))
-RRbySRT[, tbr.mid := value * tb] #dA/A = dB/B + dC/C
-RRbySRT[
-  ,
-  S := tbr.mid * sqrt((S / tb)^2 + ((hi - lo) / (3.92 * value))^2)
-] # fold in value uncertainty
-
-RRbySRT[, tbr.lo := value * (tb - 1.96 * S)]
-RRbySRT[, tbr.hi := value * (tb + 1.96 * S)]
-RRbySRT[, txt := brkt(rf(tbr.mid), rf(tbr.lo), rf(tbr.hi))]
+## regions
+TBbySR <- merge(TBbySR, whokeyshort, by = "g_whoregion")
+lvls <- whokeyshort[order(g_whoregion)]$region
+lvls <- c(lvls[-5], "Global")
+TBbySR$region <- factor(TBbySR$region, levels = rev(lvls), ordered = TRUE)
 
 ## reshape & order
-tab <- dcast(data = RRbySRT, region ~ variable + Sex, value.var = "txt")
+tab <- dcast(data = TBbySR, region ~ variable + Sex, value.var = "txt")
 setcolorder(
   tab,
   c(
@@ -859,6 +854,7 @@ tab
 fwrite(tab, file = here("output/table1.csv"))
 
 ## === appendix tables on BMI
+load(here("rawdata/N8523.Rdata")) # 2023 demography
 N8523[AgeGrp == "85+", AgeGrp := "85plus"]
 N8523 <- melt(
   N8523[, .(iso3, PopMale, PopFemale, AgeGrp)],
@@ -872,28 +868,40 @@ N8523 <- N8523[
 N8523[, sum(pop)] / 1e3 #6 Bn without <15s
 
 ## merge
-DRB <- merge(DRB, N8523, by = c("iso3", "Sex", "age"))
+if ("pop" %in% names(DRBL)) DRBL[, pop := NULL]
+DRBL <- merge(DRBL, N8523, by = c("iso3", "Sex", "age"))
 
 ## calculations
-DRB[, prop17 := pgamma(17, shape = k, scale = theta)]
-DRB[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
-DRB[, pop17 := prop17 * pop]
-DRB[, pop18.5 := prop18.5 * pop]
+DRBL[, prop17 := pgamma(17, shape = k, scale = theta)]
+DRBL[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
+DRBL[, pop17 := prop17 * pop]
+DRBL[, pop18.5 := prop18.5 * pop]
 
 ## country stats for inclusion in
-BbyC <- DRB[,
+BbyC <- DRBL[,
   .(
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(iso3)
-  ]
+  by = .(iso3, iter)
+]
+
 BbyC[, c("prop17", "prop18.5") := .(
   1e2 * pop17 / pop, 1e2 * pop18.5 / pop
 )]
 
-tmp <- BbyC[, .(
+BbyCS <- BbyC[,
+  .(
+    pop17 = mean(pop17),
+    pop18.5 = mean(pop18.5),
+    prop17 = mean(prop17),
+    prop18.5 = mean(prop18.5)
+  ),
+  by = .(iso3)
+]
+
+tmp <- BbyCS[, .(
   pc17.med = round(median(prop17), 1),
   pc17.lq = round(quantile(prop17, 0.25), 1),
   pc17.uq = round(quantile(prop17, 0.75), 1),
@@ -907,19 +915,27 @@ outstats[[ok]] <- tmp
 ok <- ok + 1
 
 ## age only
-BbyAG <- DRB[,
+BbyAG <- DRBL[,
   .(
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(age)
+  by = .(age, iter)
 ]
 BbyAG[, c("prop17", "prop18.5") := .(
   1e2 * pop17 / pop, 1e2 * pop18.5 / pop
 )]
 
-tmp <- BbyAG[, .(
+BbyAGS <- BbyAG[,
+  .(
+    prop17 = mean(prop17),
+    prop18.5 = mean(prop18.5)
+  ),
+  by = .(age)
+]
+
+tmp <- BbyAGS[, .(
   pa17.med = round(median(prop17), 1),
   pa17.lq = round(quantile(prop17, 0.25), 1),
   pa17.uq = round(quantile(prop17, 0.75), 1),
@@ -927,27 +943,28 @@ tmp <- BbyAG[, .(
   pa18.5.lq = round(quantile(prop18.5, 0.25), 1),
   pa18.5.uq = round(quantile(prop18.5, 0.75), 1)
 )]
+
 tmp <- data.table(quantity = names(tmp), value = transpose(tmp)$V1)
 outstats[[ok]] <- tmp
 ok <- ok + 1
 
 ## age patterns
-BbyARS <- DRB[,
+BbyARS <- DRBL[,
   .(
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(age, g_whoregion, Sex)
+  by = .(age, g_whoregion, Sex, iter)
 ]
-BbyAGS <- DRB[,
+BbyAGS <- DRBL[,
   .(
     g_whoregion = "Global",
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(age, Sex)
+  by = .(age, Sex, iter)
 ]
 BbyAS <- rbind(BbyARS, BbyAGS)
 BbyAS <- merge(BbyAS, whokeyshort, by = "g_whoregion")
@@ -959,10 +976,9 @@ BbyAS[, `Proportion BMI<=17` := pop17 / pop]
 BbyAS[, `Proportion BMI<=18.5` := pop18.5 / pop]
 BbyASM <- melt(
   BbyAS[, .(
-    region, age, Sex,
-    `Proportion BMI<=17`,
-    `Proportion BMI<=18.5`
-  )],
+    `Proportion BMI<=17` = mean(`Proportion BMI<=17`),
+    `Proportion BMI<=18.5` = mean(`Proportion BMI<=18.5`)
+  ), by = .(region, age, Sex)],
   id = c("region", "Sex", "age")
 )
 BbyASM[, variable := gsub("Proportion ", "", variable)]
@@ -1007,14 +1023,15 @@ GP
 ggsave(GP, file = here("output/BMI_reg_age_sex_v2.png"), w = 7, h = 7)
 
 ## recalculate for uncertainty
-## merge
-DRBL <- merge(DRBL, N8523, by = c("iso3", "Sex", "age"))
+## ## merge
+## if ("pop" %in% names(DRBL)) DRBL[, pop := NULL]
+## DRBL <- merge(DRBL, N8523, by = c("iso3", "Sex", "age"))
 
-## calculations
-DRBL[, prop17 := pgamma(17, shape = k, scale = theta)]
-DRBL[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
-DRBL[, pop17 := prop17 * pop]
-DRBL[, pop18.5 := prop18.5 * pop]
+## ## calculations
+## DRBL[, prop17 := pgamma(17, shape = k, scale = theta)]
+## DRBL[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
+## DRBL[, pop17 := prop17 * pop]
+## DRBL[, pop18.5 := prop18.5 * pop]
 
 
 ## global/regional table output
@@ -1235,7 +1252,7 @@ outstats
 
 fwrite(outstats, file = here("output/outstats.csv"))
 
-
+## =================================
 ## === map plots
 library(sf)
 library(wbmapdata) ## https://github.com/petedodd/wbmapdata
