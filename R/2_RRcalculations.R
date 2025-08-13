@@ -62,8 +62,8 @@ t <- log(1-0.148) # risk function parameter
 1-exp(t) # risk increase with 1 unit decrease
 
 ## fits from bilinear model
-C <- fread(here("data/general_population_piecewise_parameters.csv"))
-D <- fread(here("data/general_population_vcov_matrix.csv"))
+C <- fread(here("rawdata/general_population_piecewise_parameters.csv"))
+D <- fread(here("rawdata/general_population_vcov_matrix.csv"))
 ## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
 exp(C$Value[4:5]) # corresponds to above
 mut <- C$Value[4:5]
@@ -237,9 +237,6 @@ DRB[, RR := RRfun(k, theta, t)]
 ## === sense check
 DRB[, mnbmi := k * theta] # for each country year
 mnbmi0 <- bmirefpop[, k * theta]
-DRB[, range(mnbmi)] # TODO some absolute crazies
-DRB[, range(RR)] # TODO ditto
-
 
 ggplot(
   DRB[RR > 0.5 & RR < 10 & mnbmi < 50],
