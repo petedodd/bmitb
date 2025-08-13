@@ -209,7 +209,10 @@ TBL[, Sex := ifelse(sex == "m", "Men", "Women")]
 
 ## average ado
 DRA <- DRA[cvgc == 0, # only converged
-  .(mn = mean(k * theta), vc = mean(k * theta^2)), # mean of mean/var
+  .(
+    mn = mean(k * theta), vc = mean(k * theta^2),
+    Vkk = mean(Vkk), Vkt = mean(Vkt), Vtt = mean(Vtt)
+  ), # mean of mean/var
   by = .(iso3, Sex = ifelse(Sex == "Boys", "Men", "Women"))
 ]
 DRA[, c("k", "theta", "age") :=
@@ -220,8 +223,10 @@ DRA[, c("k", "theta", "age") :=
   )] # make k/theta
 
 ## append
-DRB <- rbind(DRB, DRA[, .(iso3, Year = 2022, Sex, age, k, theta, cvgc = 0)])
-
+DRB <- rbind(
+  DRB,
+  DRA[, .(iso3, Year = 2022, Sex, age, k, theta, Vkk, Vkt, Vtt, cvgc = 0)]
+)
 
 ## merge
 DRB <- merge(DRB,
@@ -231,7 +236,10 @@ DRB <- merge(DRB,
 DRB <- merge(DRB, whokey, by = "iso3") # WHO regions
 
 ## apply to data
-DRB <- DRB[, .(iso3, Year, Sex, age, k, theta, tb, S, g_whoregion)] # restrict
+DRB <- DRB[, .(
+  iso3, Year, Sex, age, k, theta,
+  Vkk, Vkt, Vtt, tb, S, g_whoregion
+)] # restrict
 DRB[, RR := RRfun(k, theta, t)]
 
 ## === sense check
@@ -239,7 +247,7 @@ DRB[, mnbmi := k * theta] # for each country year
 mnbmi0 <- bmirefpop[, k * theta]
 
 ggplot(
-  DRB[RR > 0.5 & RR < 10 & mnbmi < 50],
+  DRB,
   aes(mnbmi, RR, col = g_whoregion)
 ) +
   geom_point(shape = 1) +
@@ -301,7 +309,16 @@ RRlopoff <- function(k, theta, t1, t2, L) {
 ## RRlopoff(24,0.7,t1,t1,17)
 ## RRlopoff(rep(24,10),rep(0.7,10),rep(t1,10),rep(t1,10),rep(17,10))
 
-## --- uncertainty
+## ==============
+## function for sampling
+## parameter uncertainty k, theta
+sample_kt_noise <- function(Vkk, Vkt, Vtt) {
+  V <- matrix(c(Vkk, Vkt, Vkt, Vtt), 2, 2)
+  E <- mvrnorm(1, mu = c(0, 0), Sigma = V)
+  list(k.eps = E[1], theta.eps = E[2])
+}
+
+## --- UNCERTAINTY
 eps <- 0.025
 ## make long version
 Nrep <- 1000 #number of reps
@@ -312,6 +329,37 @@ t1t2 <- mvrnorm(n = nrow(DRBL), mu = mut, Sigma = W)
 head(t1t2)
 t1
 t2
+
+## (slow ~ few mins)
+DRBL[, c("k.eps", "theta.eps") := sample_kt_noise(Vkk, Vkt, Vtt),
+  by = .(iter, iso3, Sex, age)
+]
+
+## restrict to avoid unrealistic variations
+DRBL[ #not more than +/- 50%
+  ,
+  bad := (k + k.eps) > 1.5 * k | (k + k.eps) < k / 2 |
+    (theta + theta.eps) > 1.5 * theta | (theta + theta.eps) < theta / 2
+]
+DRBL[, c("k.new", "theta.new") := .(k + k.eps, theta + theta.eps)]
+tmp <- DRBL[bad == FALSE,
+  .(k.new.0 = mean(k.new), theta.new.0 = mean(theta.new)),
+  by = .(g_whoregion, Sex, age)
+]
+DRBL <- merge(DRBL, tmp, by = c("g_whoregion", "Sex", "age"))
+DRBL[bad == TRUE, c("k.new", "theta.new") := .(k.new.0, theta.new.0)]
+
+## add noise
+DRBL[, c("k", "theta") := .(k.new, theta.new)]
+
+## drop unused vars
+DRBL[, c("k.eps", "theta.eps") := NULL]
+DRBL[, c("k.new", "theta.new") := NULL]
+DRBL[, c("k.new.0", "theta.new.0") := NULL]
+DRBL[, c("Vkk", "Vtt", "Vkt", "bad") := NULL]
+
+summary(DRBL)
+
 
 ## compute values:
 DRBL[, RR0 := RRlopoff(k, theta, t1t2[, 1], t1t2[, 2], 0)]
@@ -499,11 +547,11 @@ ggplot(RRbyASR, aes(age, value,
   scale_y_continuous(labels = function(x) scales::percent(abs(x))) +
   geom_hline(yintercept = 0, col = 2) +
   annotate(
-    y = -0.55, x = 4,
+    y = -0.4, x = 4,
     label = "atop(italic('female'))", geom = "text", parse = TRUE
   ) +
   annotate(
-    y = +0.55, x = 4,
+    y = +0.4, x = 4,
     label = "atop(italic('male'))", geom = "text", parse = TRUE
   ) +
   ylab("Reduction in global TB incidence in group") +
@@ -731,6 +779,7 @@ setcolorder(
 )
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
+tab
 
 fwrite(tab, file = here("output/table1.csv"))
 
@@ -845,7 +894,7 @@ BbyASM[, variable := gsub("Proportion ", "", variable)]
 
 
 ## plot
-ggplot(
+GP <- ggplot(
   BbyASM,
   aes(
     x = age,
@@ -872,41 +921,55 @@ ggplot(
     legend.title = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
+GP
 
-
-ggsave(here("output/BMI_reg_age_sex.png"), w = 10, h = 5)
+ggsave(GP, file = here("output/BMI_reg_age_sex.png"), w = 10, h = 5)
 fwrite(BbyASM, file = here("output/BbyASM.csv"))
 
+GP <- GP + facet_grid(variable ~ Sex) + guides(lty = "none")
+GP
+
+ggsave(GP, file = here("output/BMI_reg_age_sex_v2.png"), w = 7, h = 7)
+
+## recalculate for uncertainty
+## merge
+DRBL <- merge(DRBL, N8523, by = c("iso3", "Sex", "age"))
+
+## calculations
+DRBL[, prop17 := pgamma(17, shape = k, scale = theta)]
+DRBL[, prop18.5 := pgamma(18.5, shape = k, scale = theta)]
+DRBL[, pop17 := prop17 * pop]
+DRBL[, pop18.5 := prop18.5 * pop]
 
 
 ## global/regional table output
-BbyRS <- DRB[,
+BbyRS <- DRBL[,
   .(
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(g_whoregion, Sex)
+  by = .(g_whoregion, Sex, iter)
 ]
-BbyR <- DRB[,
+BbyR <- DRBL[,
   .(
     Sex = "Both",
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(g_whoregion)
+  by = .(g_whoregion, iter)
 ]
-BbyGS <- DRB[,
+BbyGS <- DRBL[,
   .(
     g_whoregion = "Global",
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
   ),
-  by = .(Sex)
+  by = .(Sex, iter)
 ]
-BbyG <- DRB[
+BbyG <- DRBL[
   ,
   .(
     Sex = "Both",
@@ -914,23 +977,81 @@ BbyG <- DRB[
     pop17 = sum(pop17),
     pop18.5 = sum(pop18.5),
     pop = sum(pop)
-  )
+  ),
+  by = iter
 ]
+
 BbyX <- rbindlist(list(BbyRS, BbyR, BbyGS, BbyG),
   use.names = TRUE
-)
+  )
 BbyX[, c("prop17", "prop18.5") := .(
-  round(1e2 * pop17 / pop, 1), round(1e2 * pop18.5 / pop, 1)
+  1e2 * pop17 / pop, 1e2 * pop18.5 / pop
+  )]
+
+BbyXS <- BbyX[, .(
+  pop17 = mean(pop17),
+  pop18.5 = mean(pop18.5),
+  pop17.lo = quantile(pop17, eps),
+  pop18.5.lo = quantile(pop18.5, eps),
+  pop17.hi = quantile(pop17, 1 - eps),
+  pop18.5.hi = quantile(pop18.5, 1 - eps),
+  prop17 = mean(prop17),
+  prop18.5 = mean(prop18.5),
+  prop17.lo = quantile(prop17, eps),
+  prop18.5.lo = quantile(prop18.5, eps),
+  prop17.hi = quantile(prop17, 1 - eps),
+  prop18.5.hi = quantile(prop18.5, 1 - eps)
+), by = .(g_whoregion, Sex)]
+
+## pop/% txt
+BbyXS[, c("txt17", "txt18.5") := .(
+  paste0(rf(pop17), " (", round(prop17,1), "%)"),
+  paste0(rf(pop18.5), " (", round(prop18.5,1), "%)")
+  )]
+## % txt
+BbyXS[, c("pctxt17", "pctxt18.5") := .(
+  paste0(
+    round(prop17, 1),
+    "% (", round(prop17.lo, 1),
+    "% to ",
+    round(prop17.hi, 1),
+    "%)"
+  ),
+  paste0(
+    round(prop18.5, 1),
+    "% (",
+    round(prop18.5.lo, 1),
+    "% to ",
+    round(prop18.5.hi, 1),
+    "%)"
+  )
 )]
-BbyX[, c("txt17", "txt18.5") := .(
-  paste0(rf(pop17), " (", prop17, "%)"),
-  paste0(rf(pop18.5), " (", prop18.5, "%)")
+## pop txt
+BbyXS[, c("ptxt17", "ptxt18.5") := .(
+  paste0(
+    rf(pop17),
+    " (", rf(pop17.lo),
+    " to ",
+    rf(pop17.hi),
+    ")"
+  ),
+  paste0(
+    rf(pop18.5),
+    " (",
+    rf(pop18.5.lo),
+    " to ",
+    rf(pop18.5.hi),
+    ")"
+  )
 )]
-BbyX <- merge(BbyX, whokeyshort, by = "g_whoregion")
+
+BbyXS
+
+BbyXS <- merge(BbyXS, whokeyshort, by = "g_whoregion")
 
 
 ## reshape & order
-tab <- dcast(data = BbyX, region ~ Sex, value.var = c("txt17", "txt18.5"))
+tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("txt17", "txt18.5"))
 tab <- tab[, .(region,
   `Men, BMI<=17` = txt17_Men,
   `Women, BMI<=17` = txt17_Women,
@@ -941,11 +1062,45 @@ tab <- tab[, .(region,
 )]
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
+tab
 
 fwrite(tab, file = here("output/atable_BMI.csv"))
 
+
+## reshape & order
+tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("pctxt17", "pctxt18.5"))
+tab <- tab[, .(region,
+  `Men, BMI<=17` = pctxt17_Men,
+  `Women, BMI<=17` = pctxt17_Women,
+  `Both, BMI<=17` = pctxt17_Both,
+  `Men, BMI<=18.5` = pctxt18.5_Men,
+  `Women, BMI<=18.5` = pctxt18.5_Women,
+  `Both, BMI<=18.5` = pctxt18.5_Both
+)]
+tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
+setkey(tab, region)
+tab
+
+fwrite(tab, file = here("output/atable_BMI_pc.csv"))
+
+## reshape & order
+tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("ptxt17", "ptxt18.5"))
+tab <- tab[, .(region,
+  `Men, BMI<=17` = ptxt17_Men,
+  `Women, BMI<=17` = ptxt17_Women,
+  `Both, BMI<=17` = ptxt17_Both,
+  `Men, BMI<=18.5` = ptxt18.5_Men,
+  `Women, BMI<=18.5` = ptxt18.5_Women,
+  `Both, BMI<=18.5` = ptxt18.5_Both
+)]
+tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
+setkey(tab, region)
+tab
+
+fwrite(tab, file = here("output/atable_BMI_pop.csv"))
+
 ## country lopoffs
-RRbyC <- DRBL[Year == 2022, .(
+RRbyC <- DRBL[Year == 2022 & tb > 0, .(
   RR0 = weighted.mean(RR0, tb),
   RR17 = weighted.mean(RR17, tb),
   RR18.5 = weighted.mean(RR18.5, tb),
@@ -953,9 +1108,11 @@ RRbyC <- DRBL[Year == 2022, .(
 ),
 by = .(iso3, g_whoregion, iter)
 ]
-RRbyC[, RR18.5 := RR18.5 / RR0]
+RRbyC[, RR18.5 := RR18.5 / (RR0 + 1e-6)]
 RRbyC <- RRbyC[, .(
   RR18.5 = mean(RR18.5),
+  RR18.5.lo = quantile(RR18.5, eps),
+  RR18.5.hi = quantile(RR18.5, 1 - eps),
   tb = mean(tb)
 ),
 by = .(iso3, g_whoregion)
@@ -963,7 +1120,13 @@ by = .(iso3, g_whoregion)
 der <- RRbyC[, order(RR18.5, tb, decreasing = TRUE)]
 RRbyC$iso3 <- factor(RRbyC$iso3, levels = RRbyC$iso3[der], ordered = TRUE)
 RRbyC[, redn := 1 - RR18.5]
-
+RRbyC[, redn.lo := 1 - RR18.5.hi]
+RRbyC[, redn.hi := 1 - RR18.5.lo]
+RRbyC[, pctxt18.5 := paste0(
+  round(1e2 * redn, 1), "% (",
+  round(1e2 * redn.lo, 1), "% to ",
+  round(1e2 * redn.hi, 1), "%)"
+)]
 
 ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
   geom_point(shape = 1) +
@@ -979,10 +1142,17 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
 ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
 ## TODO uncertainty version with text output
-fwrite(RRbyC[redn > 0.25], file = here("output/gt25pc.csv"))
+fwrite(RRbyC[redn > 0.25, .(iso3, pctxt18.5)], file = here("output/gt25pc.csv"))
 write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
   file = here("output/gt25pc_tab.csv")
 )
+cat(RRbyC[redn > 0.25, as.character(iso3)],
+  file = here("output/gt25pcISO3.txt")
+)
+fwrite(RRbyC[, .(iso3, pctxt18.5)],
+  file = here("output/all_country_reductions.csv")
+)
+
 
 ## === record output stats
 outstats <- rbindlist(outstats) # gather
@@ -1082,4 +1252,3 @@ cp <- ggplot(data = MPC) +
 cp
 
 ggsave(cp, file = here("output/RR_lopoff_cart.png"), w = 12, h = 10)
-
