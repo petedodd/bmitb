@@ -37,3 +37,6 @@ upload.to.sheets("outstats.csv", shid)
 upload.to.sheets("all_country_reductions.csv", shid)
 upload.to.sheets("atable_BMI_pop.csv", shid)
 upload.to.sheets("atable_BMI_pc.csv", shid)
+
+upload.to.sheets("RRbyASR.csv", shid)
+upload.to.sheets("RRbyAS.csv", shid)
