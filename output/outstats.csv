@@ -3,47 +3,47 @@ No. acats,15
 No. countries,199
 Countries relevant pop%,99.82%
 Countries TB%,99.96%
-Global % redn 17,16.8% (14.3% to 16.8%)
-Global % redn 18.5,26.6% (23.2% to 26.6%)
-% reduction: South-East Asia,28.9% (25.2% to 28.9%)
-% reduction: Africa,28.5% (24.9% to 28.5%)
-% reduction: Eastern Mediterranean,27.8% (22.2% to 27.8%)
-Men: global % reduction 18.5,25.3% (22% to 25.3%)
-Women: global % reduction 18.5,28.9% (25.1% to 28.9%)
-W/M ration in % reduction: Western Pacific,1.11341065131055
-W/M ration in % reduction: South-East Asia,1.14143430108643
-W/M ration in % reduction: Europe,2.19431088287418
-W/M ration in % reduction: Eastern Mediterranean,1.04179723868505
-W/M ration in % reduction: The Americas,1.26381916385521
-W/M ration in % reduction: Africa,1.10785913256795
-Global N redn: BMI = 17,"1,400,000 (1,070,000 to 1,730,000)"
+Global % redn 17,16.8% (14.4% to 19.2%)
+Global % redn 18.5,26.6% (23.4% to 29.9%)
+% reduction: South-East Asia,28.9% (25.4% to 32.4%)
+% reduction: Africa,28.5% (25% to 32%)
+% reduction: Eastern Mediterranean,27.9% (22.2% to 33.5%)
+Men: global % reduction 18.5,25.3% (22.1% to 28.6%)
+Women: global % reduction 18.5,28.9% (25.3% to 32.6%)
+W/M ratio in % reduction: Western Pacific,1.11293837129471
+W/M ratio in % reduction: South-East Asia,1.14070721233842
+W/M ratio in % reduction: Europe,2.19187276072839
+W/M ratio in % reduction: Eastern Mediterranean,1.04317321238723
+W/M ratio in % reduction: The Americas,1.26491980726811
+W/M ratio in % reduction: Africa,1.10879242833584
+Global N redn: BMI = 17,"1,400,000 (1,070,000 to 1,720,000)"
 Global N redn: BMI = 18.5,"2,270,000 (1,840,000 to 2,710,000)"
-M/W ration in N reduction: Global,1.45606752994014
-M/W ration in N reduction: Western Pacific,1.98949462469113
-M/W ration in N reduction: South-East Asia,1.40326802401719
-M/W ration in N reduction: Europe,0.899419470885863
-M/W ration in N reduction: Eastern Mediterranean,1.1830093672669
-M/W ration in N reduction: The Americas,1.43423049230057
-M/W ration in N reduction: Africa,1.46584584191831
+M/W ratio in N reduction 18.5: Global,1.45573106466885
+M/W ratio in N reduction 18.5: Western Pacific,1.98935520950356
+M/W ratio in N reduction 18.5: South-East Asia,1.40365392292731
+M/W ratio in N reduction 18.5: Europe,0.900196810491767
+M/W ratio in N reduction 18.5: Eastern Mediterranean,1.18047066883604
+M/W ratio in N reduction 18.5: The Americas,1.43328731221292
+M/W ratio in N reduction 18.5: Africa,1.46502429786313
 pc17.med,2.3
 pc17.lq,1.3
 pc17.uq,5.4
-pc18.5.med,5.3
+pc18.5.med,5.4
 pc18.5.lq,3.4
-pc18.5.uq,11.9
+pc18.5.uq,12
 pa17.med,3.3
 pa17.lq,2.5
 pa17.uq,5
 pa18.5.med,6.9
 pa18.5.lq,5.7
 pa18.5.uq,10.3
-BMI global N<17,"289,000 (282,000 to 297,000)"
-BMI global N<18.5,"609,000 (601,000 to 618,000)"
-BMI global %<17,4.8% (4.7% to 4.9%)
+BMI global N<17,"289,000 (282,000 to 298,000)"
+BMI global N<18.5,"609,000 (600,000 to 619,000)"
+BMI global %<17,4.8% (4.7% to 5%)
 BMI global %<18.5,10.2% (10% to 10.3%)
-MF17 (BMI) in AFR,1.42134701808345
-MF17 (BMI) in AMR,0.797331184377063
-MF17 (BMI) in EMR,1.23114322978542
-MF17 (BMI) in EUR,0.449132208617539
-MF17 (BMI) in SEA,0.99247924417534
-MF17 (BMI) in WPR,0.614659053545458
+MF17 (BMI) in AFR,1.41935997977932
+MF17 (BMI) in AMR,0.797197995244497
+MF17 (BMI) in EMR,1.23094052532611
+MF17 (BMI) in EUR,0.449682305982224
+MF17 (BMI) in SEA,0.995492903094162
+MF17 (BMI) in WPR,0.613665986680807

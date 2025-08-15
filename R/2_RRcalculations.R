@@ -59,10 +59,11 @@ brktpc <- function(x, y, z) {       #bracket %
   brkt0(
     paste0(rd(x), "%"),
     paste0(rd(y), "%"),
-    paste0(rd(x), "%")
+    paste0(rd(z), "%")
   )
 }
 
+set.seed(1234)
 
 ## Saunders et al linear parameters
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
@@ -885,7 +886,7 @@ tmp <- dcast(tmp[, .(region, Sex, value)],
   value.var = "value"
   )
 tmp <- tmp[, .(
-  quantity = paste0("W/M ration in % reduction: ", region),
+  quantity = paste0("W/M ratio in % reduction: ", region),
   value = Women / Men
 )]
 outstats[[ok]] <- tmp
@@ -993,7 +994,7 @@ tmp <- dcast(tmp[, .(region, Sex, value)],
   value.var = "value"
 )
 tmp <- tmp[, .(
-  quantity = paste0("M/W ration in N reduction: ", region),
+  quantity = paste0("M/W ratio in N reduction 18.5: ", region),
   value = Men / Women
 )]
 outstats[[ok]] <- tmp
@@ -1008,7 +1009,7 @@ tmp <- dcast(tmp[, .(region, Sex, value)],
   value.var = "value"
   )
 tmp <- tmp[, .(
-  quantity = paste0("M/W ration in N reduction: ", region),
+  quantity = paste0("M/W ratio in N reduction 18.5: ", region),
   value = Men / Women
 )]
 outstats[[ok]] <- tmp
@@ -1058,7 +1059,11 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
 ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
 ## uncertainty version with text output
-fwrite(RRbyC[redn > 0.25, .(iso3, pctxt18.5)], file = here("output/gt25pc.csv"))
+fwrite(
+  RRbyC[redn > 0.25, .(g_whoregion, iso3, pctxt18.5)][order(g_whoregion)],
+  file = here("output/gt25pc.csv")
+)
+
 write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
   file = here("output/gt25pc_tab.csv")
 )
