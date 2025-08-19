@@ -30,6 +30,7 @@ whokeyshort <- rbind(
   whokeyshort,
   data.table(g_whoregion = "Global", region = "Global")
 )
+ckey <- unique(TBN[, .(iso3, country, g_whoregion)])
 ## uncertainty aggregation
 ssum <- function(x) sqrt(sum(x^2))
 ## output formatting
@@ -1086,6 +1087,72 @@ cat(RRbyC[redn > 0.25, as.character(iso3)],
 fwrite(RRbyC[, .(iso3, pctxt18.5)],
   file = here("output/all_country_reductions.csv")
 )
+
+
+## -- barchart of biggest total drops by country
+TBbyC <- DRBL[Year == 2022, .( # region
+  tb17 = sum((1 - RR17 / RR0) * tb),
+  tb18.5 = sum((1 - RR18.5 / RR0) * tb),
+  tb17.v = sum(S^2 * (1 - RR17 / RR0)),
+  tb18.5.v = sum(S^2 * (1 - RR18.5 / RR0))
+), by = .(iso3, iter)]
+TBbyC[, Sex := "Both"]
+## means/vars over sampled-sources of uncertainty
+TBbyC <- TBbyC[,
+  .(
+    tb17 = mean(tb17),
+    tb17.ve = var(tb17), # var(E[])
+    tb17.ev = mean(tb17.v), # E[var()]
+    tb18.5 = mean(tb18.5),
+    tb18.5.ve = var(tb18.5),
+    tb18.5.ev = mean(tb18.5.v)
+  ),
+  by = .(iso3)
+]
+## total variance: var(Y) = E[var(Y|X)] + var(E[Y|X])
+TBbyC[, tb17.tv := tb17.ev + tb17.ve]
+TBbyC[, tb18.5.tv := tb18.5.ev + tb18.5.ve]
+## reshape
+TBbyC <- melt(
+  TBbyC[, .(iso3, tb17, tb17.tv, tb18.5, tb18.5.tv)],
+  id = c("iso3")
+)
+TBbyC[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
+TBbyC[, variable := gsub("\\.tv", "", variable)]
+TBbyC <- dcast(TBbyC, iso3 + variable ~ qty, value.var = "value")
+TBbyC[, variable := ifelse(grepl(17, variable), "BMI < 17 kg/m²", "BMI < 18.5 kg/m²")]
+TBbyC[, value := mid]
+TBbyC[, lo := value - sqrt(tv) * 1.96]
+TBbyC[, hi := value + sqrt(tv) * 1.96]
+TBbyC[lo < 0, hi := hi - lo]
+TBbyC[lo < 0, lo := 0]
+TBbyC <- merge(TBbyC, ckey[, .(iso3, country)], by = "iso3")
+
+
+## restrict
+isor <- TBbyC[variable == "BMI < 18.5 kg/m²"][order(mid,decreasing = TRUE)][1:20,country]
+TBbyCR <- TBbyC[country %in% isor]
+TBbyCR$country <- factor(TBbyCR$country, levels = rev(isor), ordered = TRUE)
+
+## plot
+ggplot(TBbyCR, aes(country, value,
+  ymin = lo, ymax = hi,
+  fill = variable
+)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(col = 2, width = 0, position = position_dodge(width = 1)) +
+  theme_linedraw() +
+  coord_flip() +
+  scale_y_sqrt(labels = scales::comma, limits = c(0, NA)) +
+  ylab("Reduction in tuberculosis incidence") +
+  xlab("Country") +
+  scale_fill_paletteer_d("PrettyCols::Bright") +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank()
+  )
+
+ggsave(here("output/top20_inc.png"), w = 12, h = 10)
 
 
 ## === appendix tables on BMI
