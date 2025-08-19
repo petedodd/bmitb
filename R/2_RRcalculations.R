@@ -1448,15 +1448,13 @@ fwrite(outstats, file = here("output/outstats.csv"))
 ## === map plots
 library(sf)
 library(wbmapdata) ## https://github.com/petedodd/wbmapdata
-library(cartogram)
-library(tmap)
 
-data("World") # tmap version for cartogram
 RRbyC[, iso_a3 := iso3] #to merge with above
 RRbyC[, tbredn := tb * redn]
 
 ## merge in
-MPD <- sp::merge(RRbyC, world, by = "iso3")
+MPD <- sp::merge(RRbyC, world, by = "iso3", all.y = TRUE)
+
 
 ## convert & add mid-coords
 MP <- st_as_sf(MPD)
@@ -1473,7 +1471,7 @@ p <- ggplot(data = MP) +
   theme_minimal() +
   theme(
     legend.position = "right",
-    legend.title.align = 0.5,
+    legend.title = element_text(hjust = 0.5),
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
     legend.key.width = unit(2, "lines"),
@@ -1489,7 +1487,7 @@ ggsave(p, file = here("output/RR_lopoff_map_nopoint.png"), w = 12, h = 10)
 
 
 ## version with points
-p <- p +
+p2 <- p +
   geom_sf(
     aes(
       geometry = mid,
@@ -1499,33 +1497,21 @@ p <- p +
     shape = 1
   ) +
   scale_size_continuous(name = sznm)
-p
+p2
 
-ggsave(p, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
+ggsave(p2, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
 
-
-## cartogram
-
-## merge in
-MPD2 <- sp::merge(RRbyC, World, by = "iso_a3")
-## convert & add mid-coords
-MP2 <- st_as_sf(MPD2)
-MPC <- st_transform(MP2, 3857) # convert coords
-## NOTE a little slow:
-MPC <- cartogram_cont(MPC, "tbredn") # TODO check redn!
-MPC <- st_transform(MPC, st_crs(MP2)) # convert back
-
-cp <- ggplot(data = MPC) +
-  geom_sf(aes(fill = 1e2 * redn)) +
+pi <- ggplot(data = MP) +
+  geom_sf(aes(fill = as.numeric(redn * tb / 1e3))) +
   scale_fill_distiller(
-    name = "Reduction in tuberculosis incidence (%)",
+    name = "Reduction in tuberculosis incidence (thousands)",
     na.value = "grey", trans = "sqrt",
-    palette = "Reds", direction = 1
+    palette = "Blues", direction = 1
   ) +
   theme_minimal() +
   theme(
     legend.position = "right",
-    legend.title.align = 0.5,
+    legend.title = element_text(hjust = 0.5),
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
     legend.key.width = unit(2, "lines"),
@@ -1534,6 +1520,6 @@ cp <- ggplot(data = MPC) +
   guides(
     fill = guide_colourbar(order = 1, position = "top")
   )
-cp
+pi
 
-ggsave(cp, file = here("output/RR_lopoff_cart.png"), w = 12, h = 10)
+ggsave(pi, file = here("output/RR_lopoff_map_abs.png"), w = 12, h = 10)
