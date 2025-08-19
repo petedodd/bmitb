@@ -1135,7 +1135,7 @@ TBbyCR <- TBbyC[country %in% isor]
 TBbyCR$country <- factor(TBbyCR$country, levels = rev(isor), ordered = TRUE)
 
 ## plot
-ggplot(TBbyCR, aes(country, value,
+top20 <- ggplot(TBbyCR, aes(country, value,
   ymin = lo, ymax = hi,
   fill = variable
 )) +
@@ -1144,15 +1144,17 @@ ggplot(TBbyCR, aes(country, value,
   theme_linedraw() +
   coord_flip() +
   scale_y_sqrt(labels = scales::comma, limits = c(0, NA)) +
-  ylab("Reduction in tuberculosis incidence") +
-  xlab("Country") +
+  ylab("Reduction in tuberculosis incidence (square root scale)") +
+  xlab("") +
   scale_fill_paletteer_d("PrettyCols::Bright") +
   theme(
     legend.position = "top",
-    legend.title = element_blank()
+    legend.title = element_blank(),
+     plot.margin = unit(c(0, 1.5, 0.1, 0.0), "cm")
   )
+top20
 
-ggsave(here("output/top20_inc.png"), w = 12, h = 10)
+ggsave(top20, file = here("output/top20_inc.png"), w = 12, h = 10)
 
 
 ## === appendix tables on BMI
@@ -1590,3 +1592,13 @@ pi <- ggplot(data = MP) +
 pi
 
 ggsave(pi, file = here("output/RR_lopoff_map_abs.png"), w = 12, h = 10)
+
+## --- combined figure 3
+fig3 <- ggpubr::ggarrange(p, top20,
+  ncol = 1,
+  labels = c("A", "B")
+)
+fig3
+ggsave(fig3, file = here("output/figs/fig3.pdf"), w = 7.5, h = 8, device = cairo_pdf)
+ggsave(fig3, file = here("output/fig3.png"), w = 7.5, h = 8)
+
