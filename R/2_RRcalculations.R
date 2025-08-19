@@ -520,7 +520,9 @@ RRbyAS <- melt(
 RRbyAS[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 RRbyAS[, variable := gsub("\\.tv", "", variable)]
 RRbyAS <- dcast(RRbyAS, Sex + age + variable ~ qty, value.var = "value")
-RRbyAS[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbyAS[, variable := ifelse(
+  grepl(17, variable), "BMI < 17 kg/m\u00B2", "BMI < 18.5 kg/m\u00B2"
+)]
 RRbyAS[, value := 1 - mid]
 RRbyAS[, lo := value - sqrt(tv) * 1.96]
 RRbyAS[, hi := value + sqrt(tv) * 1.96]
@@ -594,7 +596,7 @@ ggplot(RRbyAS, aes(age, value,
   )
 
 ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
-ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5)
+ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5, device = cairo_pdf)
 
 fwrite(
   RRbyAS[, .(g_whoregion="Global", Sex, age, variable,
@@ -636,8 +638,14 @@ RRbyASR <- melt(
 ## calculations
 RRbyASR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 RRbyASR[, variable := gsub("\\.tv", "", variable)]
-RRbyASR <- dcast(RRbyASR, Sex + age + g_whoregion + variable ~ qty, value.var = "value")
-RRbyASR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbyASR <- dcast(RRbyASR,
+  Sex + age + g_whoregion + variable ~ qty,
+  value.var = "value"
+)
+
+RRbyASR[, variable := ifelse(
+  grepl(17, variable), "BMI < 17 kg/m\u00B2", "BMI < 18.5 kg/m\u00B2"
+)]
 RRbyASR[, value := 1 - mid]
 RRbyASR[, lo := value - sqrt(tv) * 1.96]
 RRbyASR[, hi := value + sqrt(tv) * 1.96]
@@ -722,7 +730,10 @@ ggplot(RRbyASR, aes(age, value,
 ggsave(here("output/RR_age_sex_reg_lopoff_flip.png"), w = 15, h = 10)
 
 fwrite(
-  RRbyASR[, .(g_whoregion, Sex, age, variable, reduction = brktpc(value, lo, hi))],
+  RRbyASR[, .(
+    g_whoregion, Sex, age, variable,
+    reduction = brktpc(value, lo, hi)
+  )],
   file = here("output/RRbyASR.csv")
 )
 
@@ -784,7 +795,9 @@ RRbySR <- melt(
 RRbySR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 RRbySR[, variable := gsub("\\.tv", "", variable)]
 RRbySR <- dcast(RRbySR, Sex + g_whoregion + variable ~ qty, value.var = "value")
-RRbySR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+RRbySR[, variable := ifelse(
+  grepl(17, variable), "BMI < 17 kg/m\u00B2", "BMI < 18.5 kg/m\u00B2"
+)]
 RRbySR[, value := 1 - mid]
 RRbySR[, lo := value - sqrt(tv) * 1.96]
 RRbySR[, hi := value + sqrt(tv) * 1.96]
@@ -825,7 +838,7 @@ ggplot(RRbySR, aes(region, value,
   )
 
 ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
-ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6)
+ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6, device = cairo_pdf)
 fwrite(RRbySR, file = here("output/RRbySR.csv"))
 
 ## -- % reductions stats
@@ -852,7 +865,7 @@ ok <- ok + 1
 ## top 3
 tmp <- RRbySR[region != "Global" &
   Sex == "Both" &
-  variable == "BMI = 18.5"][
+  variable == "BMI < 18.5 kg/m²"][
   order(value, decreasing = TRUE)
 ][1:3]
 tmp[, txt := brktpc(value, lo, hi)]
@@ -866,7 +879,7 @@ ok <- ok + 1
 ## global sexratio
 tmp <- RRbySR[region == "Global" &
   Sex != "Both" &
-  variable == "BMI = 18.5"]
+  variable == "BMI < 18.5 kg/m²"]
 tmp <- tmp[
   ,
   .(
@@ -880,7 +893,7 @@ ok <- ok + 1
 ## regional sexratio
 tmp <- RRbySR[region != "Global" &
   Sex != "Both" &
-  variable == "BMI = 18.5"]
+  variable == "BMI < 18.5 kg/m²"]
 tmp <- dcast(tmp[, .(region, Sex, value)],
   region ~ Sex,
   value.var = "value"
@@ -945,7 +958,7 @@ TBbySR <- melt(
 TBbySR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 TBbySR[, variable := gsub("\\.tv", "", variable)]
 TBbySR <- dcast(TBbySR, Sex + g_whoregion + variable ~ qty, value.var = "value")
-TBbySR[, variable := ifelse(grepl(17, variable), "BMI = 17", "BMI = 18.5")]
+TBbySR[, variable := ifelse(grepl(17, variable), "BMI < 17 kg/m²", "BMI < 18.5 kg/m²")]
 TBbySR[, value := mid]
 TBbySR[, lo := value - sqrt(tv) * 1.96]
 TBbySR[, hi := value + sqrt(tv) * 1.96]
@@ -965,8 +978,8 @@ setcolorder(
   tab,
   c(
     "region",
-    "BMI = 17_Men", "BMI = 17_Women", "BMI = 17_Both",
-    "BMI = 18.5_Men", "BMI = 18.5_Women", "BMI = 18.5_Both"
+    "BMI < 17 kg/m²_Men", "BMI < 17 kg/m²_Women", "BMI < 17 kg/m²_Both",
+    "BMI < 18.5 kg/m²_Men", "BMI < 18.5 kg/m²_Women", "BMI < 18.5 kg/m²_Both"
   )
 )
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
@@ -988,7 +1001,7 @@ ok <- ok + 1
 ## global sexratio
 tmp <- TBbySR[region == "Global" &
   Sex != "Both" &
-  variable == "BMI = 18.5"]
+  variable == "BMI < 18.5 kg/m²"]
 tmp <- dcast(tmp[, .(region, Sex, value)],
   region ~ Sex,
   value.var = "value"
@@ -1003,7 +1016,7 @@ ok <- ok + 1
 ## regional sexratio
 tmp <- TBbySR[region != "Global" &
   Sex != "Both" &
-  variable == "BMI = 18.5"]
+  variable == "BMI < 18.5 kg/m²"]
 tmp <- dcast(tmp[, .(region, Sex, value)],
   region ~ Sex,
   value.var = "value"
@@ -1189,12 +1202,12 @@ BbyAS$region <- factor(BbyAS$region,
   levels = c(whozt, "Global"),
   ordered = TRUE
 )
-BbyAS[, `Proportion BMI<=17` := pop17 / pop]
-BbyAS[, `Proportion BMI<=18.5` := pop18.5 / pop]
+BbyAS[, `Proportion BMI < 17 kg/m²` := pop17 / pop]
+BbyAS[, `Proportion BMI < 18.5 kg/m²` := pop18.5 / pop]
 BbyASM <- melt(
   BbyAS[, .(
-    `Proportion BMI<=17` = mean(`Proportion BMI<=17`),
-    `Proportion BMI<=18.5` = mean(`Proportion BMI<=18.5`)
+    `Proportion BMI < 17 kg/m²` = mean(`Proportion BMI < 17 kg/m²`),
+    `Proportion BMI < 18.5 kg/m²` = mean(`Proportion BMI < 18.5 kg/m²`)
   ), by = .(region, age, Sex)],
   id = c("region", "Sex", "age")
 )
@@ -1348,12 +1361,12 @@ BbyXS
 ## reshape & order
 tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("txt17", "txt18.5"))
 tab <- tab[, .(region,
-  `Men, BMI<=17` = txt17_Men,
-  `Women, BMI<=17` = txt17_Women,
-  `Both, BMI<=17` = txt17_Both,
-  `Men, BMI<=18.5` = txt18.5_Men,
-  `Women, BMI<=18.5` = txt18.5_Women,
-  `Both, BMI<=18.5` = txt18.5_Both
+  `Men, BMI < 17 kg/m²` = txt17_Men,
+  `Women, BMI < 17 kg/m²` = txt17_Women,
+  `Both, BMI < 17 kg/m²` = txt17_Both,
+  `Men, BMI < 18.5 kg/m²` = txt18.5_Men,
+  `Women, BMI < 18.5 kg/m²` = txt18.5_Women,
+  `Both, BMI < 18.5 kg/m²` = txt18.5_Both
 )]
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
@@ -1365,12 +1378,12 @@ fwrite(tab, file = here("output/atable_BMI.csv"))
 ## reshape & order
 tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("pctxt17", "pctxt18.5"))
 tab <- tab[, .(region,
-  `Men, BMI<=17` = pctxt17_Men,
-  `Women, BMI<=17` = pctxt17_Women,
-  `Both, BMI<=17` = pctxt17_Both,
-  `Men, BMI<=18.5` = pctxt18.5_Men,
-  `Women, BMI<=18.5` = pctxt18.5_Women,
-  `Both, BMI<=18.5` = pctxt18.5_Both
+  `Men, BMI < 17 kg/m²` = pctxt17_Men,
+  `Women, BMI < 17 kg/m²` = pctxt17_Women,
+  `Both, BMI < 17 kg/m²` = pctxt17_Both,
+  `Men, BMI < 18.5 kg/m²` = pctxt18.5_Men,
+  `Women, BMI < 18.5 kg/m²` = pctxt18.5_Women,
+  `Both, BMI < 18.5 kg/m²` = pctxt18.5_Both
 )]
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
@@ -1381,12 +1394,12 @@ fwrite(tab, file = here("output/atable_BMI_pc.csv"))
 ## reshape & order
 tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("ptxt17", "ptxt18.5"))
 tab <- tab[, .(region,
-  `Men, BMI<=17` = ptxt17_Men,
-  `Women, BMI<=17` = ptxt17_Women,
-  `Both, BMI<=17` = ptxt17_Both,
-  `Men, BMI<=18.5` = ptxt18.5_Men,
-  `Women, BMI<=18.5` = ptxt18.5_Women,
-  `Both, BMI<=18.5` = ptxt18.5_Both
+  `Men, BMI < 17 kg/m²` = ptxt17_Men,
+  `Women, BMI < 17 kg/m²` = ptxt17_Women,
+  `Both, BMI < 17 kg/m²` = ptxt17_Both,
+  `Men, BMI < 18.5 kg/m²` = ptxt18.5_Men,
+  `Women, BMI < 18.5 kg/m²` = ptxt18.5_Women,
+  `Both, BMI < 18.5 kg/m²` = ptxt18.5_Both
 )]
 tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
@@ -1398,7 +1411,8 @@ fwrite(tab, file = here("output/atable_BMI_pop.csv"))
 ## global both sexes
 tmp <- data.table(
   quantity = c(
-    "BMI global N<17", "BMI global N<18.5", "BMI global %<17", "BMI global %<18.5"
+    "BMI global N<17", "BMI global N<18.5",
+    "BMI global %<17", "BMI global %<18.5"
   ),
   value = unlist(BbyXS[
     region == "Global" & Sex == "Both",
@@ -1417,7 +1431,9 @@ tmp <- dcast(
   g_whoregion ~ Sex,
   value.var = c("prop17", "prop18.5")
 )
-tmp[, c("MF17", "MF18.5") := .(prop17_Men / prop17_Women, prop18.5_Men / prop18.5_Women)]
+tmp[, c("MF17", "MF18.5") := .(
+  prop17_Men / prop17_Women, prop18.5_Men / prop18.5_Women
+)]
 tmp <- tmp[, .(quantity = paste0("MF17 (BMI) in ", g_whoregion), value = MF17)]
 outstats[[ok]] <- tmp
 ok <- ok + 1
