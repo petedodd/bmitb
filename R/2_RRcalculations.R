@@ -891,19 +891,36 @@ tmp <- tmp[
 outstats[[ok]] <- tmp
 ok <- ok + 1
 
-## regional sexratio
-tmp <- RRbySR[region != "Global" &
+tmp1 <- RRbySR[region == "Global" &
   Sex != "Both" &
   variable == "BMI < 18.5 kg/m²"]
-tmp <- dcast(tmp[, .(region, Sex, value)],
+tmp1 <- dcast(tmp1[, .(region, Sex, value, tv)],
   region ~ Sex,
-  value.var = "value"
-  )
-tmp <- tmp[, .(
-  quantity = paste0("W/M ratio in % reduction: ", region),
-  value = Women / Men
+  value.var = c("value", "tv")
+)
+tmp1[, MF := value_Men / value_Women]
+tmp1[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
+tmp1[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
+tmp1 <- tmp1[, .(quantity = "MF ratio in % reduction 18.5: Global", value = txt)]
+outstats[[ok]] <- tmp1
+ok <- ok + 1
+
+## regional sexratio
+tmp2 <- RRbySR[region != "Global" &
+  Sex != "Both" &
+  variable == "BMI < 18.5 kg/m²"]
+tmp2 <- dcast(tmp2[, .(region, Sex, value, tv)],
+  region ~ Sex,
+  value.var = c("value", "tv")
+)
+tmp2[, MF := value_Men / value_Women]
+tmp2[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
+tmp2[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
+tmp2 <- tmp2[, .(
+  quantity = paste0("MF ratio in % reduction 18.5: ", region),
+  value = txt
 )]
-outstats[[ok]] <- tmp
+outstats[[ok]] <- tmp2
 ok <- ok + 1
 
 
@@ -1003,13 +1020,16 @@ ok <- ok + 1
 tmp <- TBbySR[region == "Global" &
   Sex != "Both" &
   variable == "BMI < 18.5 kg/m²"]
-tmp <- dcast(tmp[, .(region, Sex, value)],
+tmp <- dcast(tmp[, .(region, Sex, value, tv)],
   region ~ Sex,
-  value.var = "value"
-)
+  value.var = c("value", "tv")
+  )
+tmp[, MF := value_Men / value_Women]
+tmp[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
+tmp[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
 tmp <- tmp[, .(
-  quantity = paste0("M/W ratio in N reduction 18.5: ", region),
-  value = Men / Women
+  quantity = paste0("MF ratio in N reduction 18.5: ", region),
+  value = txt
 )]
 outstats[[ok]] <- tmp
 ok <- ok + 1
@@ -1018,13 +1038,19 @@ ok <- ok + 1
 tmp <- TBbySR[region != "Global" &
   Sex != "Both" &
   variable == "BMI < 18.5 kg/m²"]
-tmp <- dcast(tmp[, .(region, Sex, value)],
+tmp <- dcast(tmp[, .(region, Sex, value, tv)],
   region ~ Sex,
-  value.var = "value"
-  )
+  value.var = c("value", "tv")
+)
+tmp[, MF := value_Men / value_Women]
+tmp[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
+tmp[, c("mid", "lo", "hi") := .(MF, MF - 1.96 * MF.sd, MF + 1.96 * MF.sd)]
+tmp[lo < 0, hi := hi - lo]
+tmp[lo < 0, lo := 0]
+tmp[, txt := brkt(round(mid, 2), round(lo, 2), round(hi, 2))]
 tmp <- tmp[, .(
-  quantity = paste0("M/W ratio in N reduction 18.5: ", region),
-  value = Men / Women
+  quantity = paste0("MF ratio in N reduction 18.5: ", region),
+  value = txt
 )]
 outstats[[ok]] <- tmp
 ok <- ok + 1
@@ -1130,7 +1156,7 @@ TBbyC <- merge(TBbyC, ckey[, .(iso3, country)], by = "iso3")
 
 
 ## restrict
-isor <- TBbyC[variable == "BMI < 18.5 kg/m²"][order(mid,decreasing = TRUE)][1:20,country]
+isor <- TBbyC[variable == "BMI < 18.5 kg/m²"][order(mid, decreasing = TRUE)][1:20, country]
 TBbyCR <- TBbyC[country %in% isor]
 TBbyCR$country <- factor(TBbyCR$country, levels = rev(isor), ordered = TRUE)
 
@@ -1495,15 +1521,42 @@ ok <- ok + 1
 ## similar global!
 tmp <- dcast(
   BbyXS[
-    region != "Global" & Sex != "Both"
+    Sex != "Both",
+    .(g_whoregion, Sex,
+      prop17, prop18.5,
+      prop17.sd = (prop17.hi - prop17.lo) / 3.92,
+      prop18.5.sd = (prop18.5.hi - prop18.5.lo) / 3.92
+    )
   ],
   g_whoregion ~ Sex,
-  value.var = c("prop17", "prop18.5")
+  value.var = c("prop17", "prop18.5", "prop17.sd", "prop18.5.sd")
 )
 tmp[, c("MF17", "MF18.5") := .(
   prop17_Men / prop17_Women, prop18.5_Men / prop18.5_Women
 )]
-tmp <- tmp[, .(quantity = paste0("MF17 (BMI) in ", g_whoregion), value = MF17)]
+tmp[, c("MF17.sd", "MF18.5.sd") := .(
+  MF17 * sqrt((prop17.sd_Women / prop17_Women)^2 + (prop17.sd_Men / prop17_Men)^2),
+  MF18.5 * sqrt((prop18.5.sd_Women / prop18.5_Women)^2 + (prop18.5.sd_Men / prop18.5_Men)^2)
+)]
+tmp[, c("MF17.lo", "MF18.5.lo", "MF17.hi", "MF18.5.hi") := .(
+  MF17 - MF17.sd * 1.96, MF17 + MF17.sd * 1.96,
+  MF18.5 - MF18.5.sd * 1.96, MF18.5 + MF18.5.sd * 1.96
+  )]
+tmp <- melt(tmp[, .(g_whoregion, MF17, MF17.lo, MF17.hi, MF18.5, MF18.5.lo, MF18.5.hi)],
+  id = "g_whoregion"
+  )
+tmp[, type := fcase(
+  grepl("lo", variable), "lo",
+  grepl("hi", variable), "hi",
+  default = "mid"
+  )]
+tmp[, bmi := ifelse(grepl("17", variable), "17", "18.5")]
+tmp <- dcast(tmp, g_whoregion + bmi ~ type, value.var = "value")
+tmp[, txt := brkt(round(mid, 2), round(lo, 2), round(hi, 2))]
+tmp <- tmp[, .(
+  quantity = paste0("MF ratio % below BMI=", bmi, " for ", g_whoregion, ": "),
+  value = txt
+)]
 outstats[[ok]] <- tmp
 ok <- ok + 1
 

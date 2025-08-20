@@ -1,6 +1,7 @@
 quantity,value
 No. acats,15
 No. countries,199
+No. countries,199
 Countries relevant pop%,99.82%
 Countries TB%,99.96%
 Global % redn 17,% (% to %)
@@ -10,21 +11,22 @@ Global % redn 18.5,% (% to %)
 % reduction: Eastern Mediterranean,27.8% (22.1% to 33.4%)
 Men: global % reduction 18.5,25.2% (22% to 28.5%)
 Women: global % reduction 18.5,28.8% (25.1% to 32.5%)
-W/M ratio in % reduction: Western Pacific,1.11191064252726
-W/M ratio in % reduction: South-East Asia,1.14136088291132
-W/M ratio in % reduction: Europe,2.19482398112497
-W/M ratio in % reduction: Eastern Mediterranean,1.04319378832307
-W/M ratio in % reduction: The Americas,1.26606803081513
-W/M ratio in % reduction: Africa,1.10825897952597
+MF ratio in % reduction 18.5: Global,0.88 (0.72 to 1.04)
+MF ratio in % reduction 18.5: Western Pacific,0.9 (0.57 to 1.22)
+MF ratio in % reduction 18.5: South-East Asia,0.88 (0.72 to 1.04)
+MF ratio in % reduction 18.5: Europe,0.46 (0.32 to 0.59)
+MF ratio in % reduction 18.5: Eastern Mediterranean,0.96 (0.63 to 1.29)
+MF ratio in % reduction 18.5: The Americas,0.79 (0.58 to 1)
+MF ratio in % reduction 18.5: Africa,0.9 (0.73 to 1.07)
 Global N redn: BMI < 17 kg/m²,"1,390,000 (1,070,000 to 1,720,000)"
 Global N redn: BMI < 18.5 kg/m²,"2,270,000 (1,830,000 to 2,700,000)"
-M/W ratio in N reduction 18.5: Global,1.45595922990036
-M/W ratio in N reduction 18.5: Western Pacific,1.99114692753724
-M/W ratio in N reduction 18.5: South-East Asia,1.40322798830158
-M/W ratio in N reduction 18.5: Europe,0.899024446231009
-M/W ratio in N reduction 18.5: Eastern Mediterranean,1.18089453701467
-M/W ratio in N reduction 18.5: The Americas,1.43232000639336
-M/W ratio in N reduction 18.5: Africa,1.46616589495014
+MF ratio in N reduction 18.5: Global,1.46 (0.96 to 1.95)
+MF ratio in N reduction 18.5: Western Pacific,1.99 (0 to 4.3)
+MF ratio in N reduction 18.5: South-East Asia,1.4 (0.73 to 2.07)
+MF ratio in N reduction 18.5: Europe,0.9 (0.08 to 1.72)
+MF ratio in N reduction 18.5: Eastern Mediterranean,1.18 (0 to 2.43)
+MF ratio in N reduction 18.5: The Americas,1.43 (0.67 to 2.19)
+MF ratio in N reduction 18.5: Africa,1.47 (0.82 to 2.11)
 pc17.med,2.3
 pc17.lq,1.3
 pc17.uq,5.4
@@ -41,9 +43,17 @@ BMI global N<17,"292,000 (285,000 to 300,000)"
 BMI global N<18.5,"615,000 (607,000 to 624,000)"
 BMI global %<17,4.8% (4.7% to 5%)
 BMI global %<18.5,10.2% (10.1% to 10.3%)
-MF17 (BMI) in AFR,1.41591886110351
-MF17 (BMI) in AMR,0.796596068928515
-MF17 (BMI) in EMR,1.22763562575178
-MF17 (BMI) in EUR,0.449631119625333
-MF17 (BMI) in SEA,0.992899390842547
-MF17 (BMI) in WPR,0.610720551698685
+MF ratio % below BMI=17 for AFR: ,1.42 (1.23 to 1.35)
+MF ratio % below BMI=18.5 for AFR: ,1.45 (1.6 to 1.55)
+MF ratio % below BMI=17 for AMR: ,0.8 (0.74 to 0.84)
+MF ratio % below BMI=18.5 for AMR: ,0.89 (0.85 to 0.93)
+MF ratio % below BMI=17 for EMR: ,1.23 (1.08 to 1.1)
+MF ratio % below BMI=18.5 for EMR: ,1.2 (1.37 to 1.29)
+MF ratio % below BMI=17 for EUR: ,0.45 (0.42 to 0.51)
+MF ratio % below BMI=18.5 for EUR: ,0.53 (0.48 to 0.55)
+MF ratio % below BMI=17 for Global: ,0.99 (0.94 to 0.99)
+MF ratio % below BMI=18.5 for Global: ,1.02 (1.04 to 1.05)
+MF ratio % below BMI=17 for SEA: ,0.99 (0.91 to 1)
+MF ratio % below BMI=18.5 for SEA: ,1.05 (1.08 to 1.1)
+MF ratio % below BMI=17 for WPR: ,0.61 (0.57 to 0.64)
+MF ratio % below BMI=18.5 for WPR: ,0.67 (0.66 to 0.7)
