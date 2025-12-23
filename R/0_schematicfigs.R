@@ -4,14 +4,15 @@ library(ggplot2)
 library(data.table)
 library(officer)
 library(rvg)
+library(patchwork)
 
 ## this block from 2_...
 ## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
 t <- log(1 - 0.148) # risk function parameter
 1 - exp(t) # risk increase with 1 unit decrease
 ## fits from bilinear model
-C <- fread(here("data/general_population_piecewise_parameters.csv"))
-D <- fread(here("data/general_population_vcov_matrix.csv"))
+C <- fread(here("rawdata/general_population_piecewise_parameters.csv"))
+D <- fread(here("rawdata/general_population_vcov_matrix.csv"))
 ## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
 exp(C$Value[4:5]) # corresponds to above
 mut <- C$Value[4:5]
@@ -50,11 +51,16 @@ GP <- ggplot() +
     fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
     n = 500
   ) +
-  annotate(geom = "text", label = paste0("RR = ", rrtxt), x = 30, y = 0.08, col = 2, size = 6) +
+  annotate(
+    geom = "text",
+    label = paste0("RR = ", rrtxt),
+    x = 30, y = 0.08, col = 2, size = 6
+  ) +
   xlab("BMI (kg/m^2)") +
   ylab("Density") +
   theme_classic() +
   ggpubr::grids()
+
 GP
 
 ggsave(GP, file = here("output/eg_dist.png"), w = 6, h = 5)
@@ -88,9 +94,10 @@ DPC <- dml(ggobj = GPC) # convert
 
 ## truncated renormalized
 lopoff17 <- function(x) {
+  w <- pgamma(17, shape = bmirefpop$k, scale = bmirefpop$theta)
   ifelse(x < 17, 0,
     dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) /
-      (1 - pgamma(17, shape = bmirefpop$k, scale = bmirefpop$theta))
+      (1 - w)
   )
 }
 
@@ -102,7 +109,7 @@ GP2 <- ggplot() +
   ) +
   geom_function(
     fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
-    n = 1e3
+    n = 1e3, lty = 3
   ) +
   geom_vline(xintercept = 17, col = 2, lty = 3) +
   xlab("BMI (kg/m^2)") +
@@ -134,6 +141,7 @@ ggsave(GP3, file = here("output/eg_blriskfun.png"), w = 6, h = 5)
 
 DP3 <- dml(ggobj = GP3) #convert
 
+## ======= additional counterfactuals
 
 
 ## save out relevant plots as PPT
@@ -148,9 +156,190 @@ doc <- add_slide(doc, layout = "Blank")
 doc <- ph_with(doc, DPC, location = ph_location_fullsize())
 print(doc, target = "~/Downloads/nutrition_schematics.pptx")
 
+## ======= additional counterfactuals
+
+## truncation -> U(17,h)
+flat17 <- function(x, h = 25, fac = 1) {
+  w <- pgamma(17, shape = bmirefpop$k, scale = bmirefpop$theta)
+  ifelse(x < 17, 0,
+    fac * dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) +
+      w * ifelse(x < h, 1 / (h - 17), 0)
+  )
+}
 
 
+GP4 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = flat17,
+    n = 1e3, col = 2
+  ) +
+  geom_function(
+    fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
+    n = 1e3, lty = 3
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP4
 
+ggsave(GP4, file = here("output/eg_flat.png"), w = 6, h = 5)
+
+
+## truncation -> d(x-(h-17))
+shift17 <- function(x, h = 25, fac = 1) {
+  ifelse(x < 17, 0,
+    fac * dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) +
+      ifelse(x < h,
+        dgamma(x - (h - 17), shape = bmirefpop$k, scale = bmirefpop$theta),
+        0
+      )
+  )
+}
+
+GP5 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = shift17,
+    n = 1e3, col = 2
+  ) +
+  geom_function(
+    fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
+    n = 1e3, lty = 3
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP5
+
+ggsave(GP5, file = here("output/eg_shift.png"), w = 6, h = 5)
+
+zero17 <- function(x, h = 25) {
+  ifelse(x < 17, 0,
+    dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta)
+  )
+}
+
+extra17 <- function(x) {
+  w <- pgamma(17, shape = bmirefpop$k, scale = bmirefpop$theta)
+  ifelse(x < 17, 0,
+    w * dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) /
+      (1 - w)
+  )
+}
+
+GP00 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = zero17,
+    n = 1e3, col = 2
+  ) +
+  geom_function(
+    fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
+    n = 1e3, col = 1, lty = 3
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP00
+
+GP01 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = extra17,
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP01
+
+GP02 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = flat17,
+    args = list(fac = 0),
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  geom_vline(xintercept = 25, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP02
+
+GP03 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = shift17,
+    args = list(fac = 0),
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  geom_vline(xintercept = 25, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP03
+
+
+## standardize y axes
+ulim <- 0.105
+GP00 <- GP00 + expand_limits(y = c(0, ulim))
+GP01 <- GP01 + expand_limits(y = c(0, ulim))
+GP01 <- GP01 + expand_limits(y = c(0, ulim))
+GP02 <- GP02 + expand_limits(y = c(0, ulim))
+GP03 <- GP03 + expand_limits(y = c(0, ulim))
+GP2 <- GP2 + expand_limits(y = c(0, ulim))
+GP4 <- GP4 + expand_limits(y = c(0, ulim))
+GP5 <- GP5 + expand_limits(y = c(0, ulim))
+
+
+## combine
+GPall <- ((GP00 | GP01 | GP2) + plot_layout(tag_level = "new")) /
+  ((GP00 | GP02 | GP4) + plot_layout(tag_level = "new")) /
+  ((GP00 | GP03 | GP5) + plot_layout(tag_level = "new")) +
+  plot_annotation(tag_levels = c("A", "1"))
+
+GPall <- ggplotify::as.ggplot(GPall)
+
+GPall <- GPall +
+  annotate(
+    geom = "text", label = "+", size = unit(14, "pt"),
+    x = 1.05 / 3, y = 1 / 6
+  ) +
+  annotate(
+    geom = "text", label = "+", size = unit(14, "pt"),
+    x = 1.05 / 3, y = 1 / 6 + 1 / 3
+  ) +
+  annotate(
+    geom = "text", label = "+", size = unit(14, "pt"),
+    x = 1.05 / 3, y = 1 / 6 + 2 / 3
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"),
+    x = 1.0 / 3 + 1 / 3, y = 1 / 6
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"),
+    x = 1.0 / 3 + 1 / 3, y = 1 / 6 + 1 / 3
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"),
+    x = 1.0 / 3 + 1 / 3, y = 1 / 6 + 2 / 3
+  )
+
+ggsave(GPall, file = here("output/eg_all.png"), w = 7, h = 7)
 
 
 
