@@ -141,9 +141,6 @@ ggsave(GP3, file = here("output/eg_blriskfun.png"), w = 6, h = 5)
 
 DP3 <- dml(ggobj = GP3) #convert
 
-## ======= additional counterfactuals
-
-
 ## save out relevant plots as PPT
 doc <- read_pptx()
 doc <- add_slide(doc, layout = "Blank")
