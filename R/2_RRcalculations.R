@@ -1,7 +1,24 @@
 ## this uses distributional input data to calculate RRs and PAFs
 
+## flags for additional analyses
+## whether running from shell script or not
+shell <- FALSE
+if (shell) {
+  ## running from shell:
+  ## R --slave --vanilla --args < 02_RRcalculations.R ""
+  args <- commandArgs(trailingOnly = TRUE) # get argsm
+  print(args)
+  CF <- args[1] # which counterfactual
+} else { # set by hand
+  CF <- ""
+}
+cat("*** (using counterfactual =", CF, ") ***\n")
+plotting <- CF == ""
+if (CF != "") CF <- paste0(CF, "_")
+
 ## libraries
 library(here)
+library(glue)
 library(data.table)
 library(ggplot2)
 library(ggrepel)
@@ -63,16 +80,18 @@ brktpc <- function(x, y, z) {       #bracket %
     paste0(rd(z), "%")
   )
 }
+gh <- function(x) glue(here(x))
 
 set.seed(1234)
 
 ## relative risk functions in common
 source(here("R/riskfunctions.R"))
 
+## TODO set risk function here based on CF
+
 ## statistics to report
 outstats <- list()
 ok <- 1
-
 
 ## merge against TB estimates
 ## restrict:  "15-24" included
@@ -243,9 +262,8 @@ ggplot(
   xlab("Mean BMI in each group") +
   ylab("Associated relative risk")
 
-
-ggsave(here("output/RR_check1.png"), w = 15, h = 10)
-
+if(plotting)
+  ggsave(here("output/RR_check1.png"), w = 15, h = 10)
 
 
 ## === aggregation for quick check
@@ -426,7 +444,8 @@ ggplot(RRbyAS, aes(age, value,
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-ggsave(here("output/RR_age_sex_lopoff.png"), w = 12, h = 5)
+if(plotting)
+  ggsave(here("output/RR_age_sex_lopoff.png"), w = 12, h = 5)
 
 ## by age and sex
 ggplot(RRbyAS, aes(age, value,
@@ -475,15 +494,20 @@ ggplot(RRbyAS, aes(age, value,
     legend.title = element_blank()
   )
 
-ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
-ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5, device = cairo_pdf)
+if (plotting) {
+  ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
+  ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5, device = cairo_pdf)
+}
 
-fwrite(
-  RRbyAS[, .(g_whoregion="Global", Sex, age, variable,
-             reduction = brktpc(value, lo, hi))],
-  file = here("output/RRbyAS.csv")
-)
-
+if (plotting) {
+  fwrite(
+    RRbyAS[, .(
+      g_whoregion = "Global", Sex, age, variable,
+      reduction = brktpc(value, lo, hi)
+    )],
+    file = here("output/RRbyAS.csv")
+  )
+}
 
 ## --- reductions by Age, Sex, Region
 ## perfectly correlated weighting in num/den:
@@ -556,7 +580,8 @@ ggplot(RRbyASR, aes(age, value,
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
-ggsave(here("output/RR_age_sex_reg_lopoff.png"), w = 12, h = 15)
+if(plotting)
+  ggsave(here("output/RR_age_sex_reg_lopoff.png"), w = 12, h = 15)
 
 
 ## by age and sex
@@ -607,16 +632,19 @@ ggplot(RRbyASR, aes(age, value,
     legend.title = element_blank()
   )
 
-ggsave(here("output/RR_age_sex_reg_lopoff_flip.png"), w = 15, h = 10)
+if(plotting)
+  ggsave(here("output/RR_age_sex_reg_lopoff_flip.png"), w = 15, h = 10)
 
-fwrite(
-  RRbyASR[, .(
-    g_whoregion, Sex, age, variable,
-    reduction = brktpc(value, lo, hi)
-  )],
-  file = here("output/RRbyASR.csv")
-)
 
+if (plotting) {
+  fwrite(
+    RRbyASR[, .(
+      g_whoregion, Sex, age, variable,
+      reduction = brktpc(value, lo, hi)
+    )],
+    file = here("output/RRbyASR.csv")
+  )
+}
 
 ## --- by sex and region
 ## perfectly correlated weighting in num/den:
@@ -717,9 +745,15 @@ ggplot(RRbySR, aes(region, value,
     legend.title = element_blank()
   )
 
-ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
-ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6, device = cairo_pdf)
-fwrite(RRbySR, file = here("output/RRbySR.csv"))
+if (plotting) {
+  ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
+  ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6, device = cairo_pdf)
+
+}
+
+## NOTE this is the other output for all CF
+fwrite(RRbySR, file = gh("output/RRbySR{CF}.csv"))
+
 
 ## -- % reductions stats
 tmp <- data.table(
@@ -778,9 +812,21 @@ tmp1 <- dcast(tmp1[, .(region, Sex, value, tv)],
   value.var = c("value", "tv")
 )
 tmp1[, MF := value_Men / value_Women]
-tmp1[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
-tmp1[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
-tmp1 <- tmp1[, .(quantity = "MF ratio in % reduction 18.5: Global", value = txt)]
+tmp1[
+  ,
+  MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 +
+    (sqrt(tv_Women) / value_Women)^2)
+]
+tmp1[
+  ,
+  txt := brkt(round(MF, 2),
+              round(MF - 1.96 * MF.sd, 2),
+              round(MF + 1.96 * MF.sd, 2))
+]
+tmp1 <- tmp1[
+  ,
+  .(quantity = "MF ratio in % reduction 18.5: Global", value = txt)
+]
 outstats[[ok]] <- tmp1
 ok <- ok + 1
 
@@ -793,8 +839,19 @@ tmp2 <- dcast(tmp2[, .(region, Sex, value, tv)],
   value.var = c("value", "tv")
 )
 tmp2[, MF := value_Men / value_Women]
-tmp2[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
-tmp2[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
+tmp2[
+  ,
+  MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 +
+    (sqrt(tv_Women) / value_Women)^2)
+]
+tmp2[
+  ,
+  txt := brkt(
+    round(MF, 2),
+    round(MF - 1.96 * MF.sd, 2),
+    round(MF + 1.96 * MF.sd, 2)
+  )
+]
 tmp2 <- tmp2[, .(
   quantity = paste0("MF ratio in % reduction 18.5: ", region),
   value = txt
@@ -855,7 +912,10 @@ TBbySR <- melt(
 TBbySR[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 TBbySR[, variable := gsub("\\.tv", "", variable)]
 TBbySR <- dcast(TBbySR, Sex + g_whoregion + variable ~ qty, value.var = "value")
-TBbySR[, variable := ifelse(grepl(17, variable), "BMI < 17 kg/m²", "BMI < 18.5 kg/m²")]
+TBbySR[, variable := ifelse(grepl(17, variable),
+  "BMI < 17 kg/m²",
+  "BMI < 18.5 kg/m²"
+)]
 TBbySR[, value := mid]
 TBbySR[, lo := value - sqrt(tv) * 1.96]
 TBbySR[, hi := value + sqrt(tv) * 1.96]
@@ -883,7 +943,8 @@ tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
 tab
 
-fwrite(tab, file = here("output/table1.csv"))
+## NOTE outputted across all CFs
+fwrite(tab, file = gh("output/table1{CF}.csv"))
 
 ## -- output stats
 
@@ -904,8 +965,19 @@ tmp <- dcast(tmp[, .(region, Sex, value, tv)],
   value.var = c("value", "tv")
   )
 tmp[, MF := value_Men / value_Women]
-tmp[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
-tmp[, txt := brkt(round(MF, 2), round(MF - 1.96 * MF.sd, 2), round(MF + 1.96 * MF.sd, 2))]
+tmp[
+  ,
+  MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 +
+    (sqrt(tv_Women) / value_Women)^2)
+]
+tmp[
+  ,
+  txt := brkt(
+    round(MF, 2),
+    round(MF - 1.96 * MF.sd, 2),
+    round(MF + 1.96 * MF.sd, 2)
+  )
+]
 tmp <- tmp[, .(
   quantity = paste0("MF ratio in N reduction 18.5: ", region),
   value = txt
@@ -922,7 +994,11 @@ tmp <- dcast(tmp[, .(region, Sex, value, tv)],
   value.var = c("value", "tv")
 )
 tmp[, MF := value_Men / value_Women]
-tmp[, MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 + (sqrt(tv_Women) / value_Women)^2)]
+tmp[
+  ,
+  MF.sd := MF * sqrt((sqrt(tv_Men) / value_Men)^2 +
+    (sqrt(tv_Women) / value_Women)^2)
+]
 tmp[, c("mid", "lo", "hi") := .(MF, MF - 1.96 * MF.sd, MF + 1.96 * MF.sd)]
 tmp[lo < 0, hi := hi - lo]
 tmp[lo < 0, lo := 0]
@@ -975,24 +1051,27 @@ ggplot(RRbyC[!is.na(redn)], aes(iso3, redn, size = tb)) +
   ylab("Reduction in TB incidence") +
   xlab("Country ISO3 code")
 
-ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
+if(plotting)
+  ggsave(here("output/RR_country_reg_lopoff.png"), w = 12, h = 10)
 
-## uncertainty version with text output
-fwrite(
-  RRbyC[redn > 0.25, .(g_whoregion, iso3, pctxt18.5)][order(g_whoregion)],
-  file = here("output/gt25pc.csv")
-)
 
-write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
-  file = here("output/gt25pc_tab.csv")
-)
-cat(RRbyC[redn > 0.25, as.character(iso3)],
-  file = here("output/gt25pcISO3.txt")
-)
-fwrite(RRbyC[, .(iso3, pctxt18.5)],
-  file = here("output/all_country_reductions.csv")
-)
+if (plotting) {
+  ## uncertainty version with text output
+  fwrite(
+    RRbyC[redn > 0.25, .(g_whoregion, iso3, pctxt18.5)][order(g_whoregion)],
+    file = here("output/gt25pc.csv")
+  )
 
+  write.csv(RRbyC[redn > 0.25, table(g_whoregion)],
+    file = here("output/gt25pc_tab.csv")
+  )
+  cat(RRbyC[redn > 0.25, as.character(iso3)],
+    file = here("output/gt25pcISO3.txt")
+  )
+  fwrite(RRbyC[, .(iso3, pctxt18.5)],
+    file = here("output/all_country_reductions.csv")
+  )
+}
 
 ## -- barchart of biggest total drops by country
 TBbyC <- DRBL[Year == 2022, .( # region
@@ -1025,7 +1104,13 @@ TBbyC <- melt(
 TBbyC[, qty := ifelse(grepl("tv", variable), "tv", "mid")]
 TBbyC[, variable := gsub("\\.tv", "", variable)]
 TBbyC <- dcast(TBbyC, iso3 + variable ~ qty, value.var = "value")
-TBbyC[, variable := ifelse(grepl(17, variable), "BMI < 17 kg/m²", "BMI < 18.5 kg/m²")]
+TBbyC[
+  ,
+  variable := ifelse(grepl(17, variable),
+    "BMI < 17 kg/m²",
+    "BMI < 18.5 kg/m²"
+  )
+]
 TBbyC[, value := mid]
 TBbyC[, lo := value - sqrt(tv) * 1.96]
 TBbyC[, hi := value + sqrt(tv) * 1.96]
@@ -1035,7 +1120,13 @@ TBbyC <- merge(TBbyC, ckey[, .(iso3, country)], by = "iso3")
 
 
 ## restrict
-isor <- TBbyC[variable == "BMI < 18.5 kg/m²"][order(mid, decreasing = TRUE)][1:20, country]
+isor <- TBbyC[
+  variable == "BMI < 18.5 kg/m²"
+][
+  order(mid, decreasing = TRUE)
+][
+  1:20, country
+]
 TBbyCR <- TBbyC[country %in% isor]
 TBbyCR$country <- factor(TBbyCR$country, levels = rev(isor), ordered = TRUE)
 
@@ -1059,7 +1150,9 @@ top20 <- ggplot(TBbyCR, aes(country, value,
   )
 top20
 
-ggsave(top20, file = here("output/top20_inc.png"), w = 12, h = 10)
+if(plotting)
+  ggsave(top20, file = here("output/top20_inc.png"), w = 12, h = 10)
+
 
 
 ## === appendix tables on BMI
@@ -1218,14 +1311,17 @@ GP <- ggplot(
   )
 GP
 
-ggsave(GP, file = here("output/BMI_reg_age_sex.png"), w = 10, h = 5)
-fwrite(BbyASM, file = here("output/BbyASM.csv"))
+if (plotting) {
+  ggsave(GP, file = here("output/BMI_reg_age_sex.png"), w = 10, h = 5)
+  fwrite(BbyASM, file = here("output/BbyASM.csv"))
+}
 
 GP <- GP + facet_grid(variable ~ Sex) + guides(lty = "none")
 GP
 
-ggsave(GP, file = here("output/BMI_reg_age_sex_v2.png"), w = 7, h = 7)
-
+if (plotting) {
+  ggsave(GP, file = here("output/BMI_reg_age_sex_v2.png"), w = 7, h = 7)
+}
 
 ## global/regional table output
 BbyRS <- DRBL[,
@@ -1346,7 +1442,8 @@ tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
 tab
 
-fwrite(tab, file = here("output/atable_BMI.csv"))
+if(plotting)
+  fwrite(tab, file = here("output/atable_BMI.csv"))
 
 
 ## reshape & order
@@ -1363,7 +1460,9 @@ tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
 tab
 
-fwrite(tab, file = here("output/atable_BMI_pc.csv"))
+if(plotting)
+  fwrite(tab, file = here("output/atable_BMI_pc.csv"))
+
 
 ## reshape & order
 tab <- dcast(data = BbyXS, region ~ Sex, value.var = c("ptxt17", "ptxt18.5"))
@@ -1379,7 +1478,9 @@ tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
 tab
 
-fwrite(tab, file = here("output/atable_BMI_pop.csv"))
+if(plotting)
+  fwrite(tab, file = here("output/atable_BMI_pop.csv"))
+
 
 ## -- BMI stats
 ## global both sexes
@@ -1414,16 +1515,20 @@ tmp[, c("MF17", "MF18.5") := .(
   prop17_Men / prop17_Women, prop18.5_Men / prop18.5_Women
 )]
 tmp[, c("MF17.sd", "MF18.5.sd") := .(
-  MF17 * sqrt((prop17.sd_Women / prop17_Women)^2 + (prop17.sd_Men / prop17_Men)^2),
-  MF18.5 * sqrt((prop18.5.sd_Women / prop18.5_Women)^2 + (prop18.5.sd_Men / prop18.5_Men)^2)
+  MF17 * sqrt((prop17.sd_Women / prop17_Women)^2 +
+    (prop17.sd_Men / prop17_Men)^2),
+  MF18.5 * sqrt((prop18.5.sd_Women / prop18.5_Women)^2 +
+    (prop18.5.sd_Men / prop18.5_Men)^2)
 )]
+
 tmp[, c("MF17.lo", "MF18.5.lo", "MF17.hi", "MF18.5.hi") := .(
   MF17 - MF17.sd * 1.96, MF17 + MF17.sd * 1.96,
   MF18.5 - MF18.5.sd * 1.96, MF18.5 + MF18.5.sd * 1.96
   )]
-tmp <- melt(tmp[, .(g_whoregion, MF17, MF17.lo, MF17.hi, MF18.5, MF18.5.lo, MF18.5.hi)],
+tmp <- melt(
+  tmp[, .(g_whoregion, MF17, MF17.lo, MF17.hi, MF18.5, MF18.5.lo, MF18.5.hi)],
   id = "g_whoregion"
-  )
+)
 tmp[, type := fcase(
   grepl("lo", variable), "lo",
   grepl("hi", variable), "hi",
@@ -1443,94 +1548,102 @@ ok <- ok + 1
 outstats <- rbindlist(outstats) # gather
 outstats
 
-fwrite(outstats, file = here("output/outstats.csv"))
+if(plotting)
+  fwrite(outstats, file = here("output/outstats.csv"))
+
 
 ## =================================
 ## === map plots
-library(sf)
-library(wbmapdata) ## https://github.com/petedodd/wbmapdata
+if (plotting) {
+  
+  library(sf)
+  library(wbmapdata) ## https://github.com/petedodd/wbmapdata
 
-RRbyC[, iso_a3 := iso3] #to merge with above
-RRbyC[, tbredn := tb * redn]
+  RRbyC[, iso_a3 := iso3] # to merge with above
+  RRbyC[, tbredn := tb * redn]
 
-## merge in
-MPD <- sp::merge(RRbyC, world, by = "iso3", all.y = TRUE)
+  ## merge in
+  MPD <- sp::merge(RRbyC, world, by = "iso3", all.y = TRUE)
 
 
-## convert & add mid-coords
-MP <- st_as_sf(MPD)
+  ## convert & add mid-coords
+  MP <- st_as_sf(MPD)
 
-##  version without points
-sznm <- "Reduction in tuberculosis incidence (thousands)"
-p <- ggplot(data = MP) +
-  geom_sf(aes(fill = 1e2 * redn)) +
-  scale_fill_distiller(
-    name = "Reduction in tuberculosis incidence (%)",
-    na.value = "grey", trans = "sqrt",
-    palette = "Reds", direction = 1
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "right",
-    legend.title = element_text(hjust = 0.5),
-    axis.text.x = element_blank(),
-    axis.text.y = element_blank(),
-    legend.key.width = unit(2, "lines"),
-    legend.key.height = unit(1, "lines")
-  ) +
-  guides(
-    fill = guide_colourbar(order = 1, position = "top"),
-    size = guide_legend(order = 2, position = "bottom")
+  ##  version without points
+  sznm <- "Reduction in tuberculosis incidence (thousands)"
+  p <- ggplot(data = MP) +
+    geom_sf(aes(fill = 1e2 * redn)) +
+    scale_fill_distiller(
+      name = "Reduction in tuberculosis incidence (%)",
+      na.value = "grey", trans = "sqrt",
+      palette = "Reds", direction = 1
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      legend.title = element_text(hjust = 0.5),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      legend.key.width = unit(2, "lines"),
+      legend.key.height = unit(1, "lines")
+    ) +
+    guides(
+      fill = guide_colourbar(order = 1, position = "top"),
+      size = guide_legend(order = 2, position = "bottom")
+    )
+  p
+
+  ggsave(p, file = here("output/RR_lopoff_map_nopoint.png"), w = 12, h = 10)
+
+
+  ## version with points
+  p2 <- p +
+    geom_sf(
+      aes(
+        geometry = mid,
+        size = as.numeric(redn * tb / 1e3)
+      ),
+      show.legend = "point",
+      shape = 1
+    ) +
+    scale_size_continuous(name = sznm)
+  p2
+
+  ggsave(p2, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
+
+  pi <- ggplot(data = MP) +
+    geom_sf(aes(fill = as.numeric(redn * tb / 1e3))) +
+    scale_fill_distiller(
+      name = "Reduction in tuberculosis incidence (thousands)",
+      na.value = "grey", trans = "sqrt",
+      palette = "Blues", direction = 1
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      legend.title = element_text(hjust = 0.5),
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank(),
+      legend.key.width = unit(2, "lines"),
+      legend.key.height = unit(1, "lines")
+    ) +
+    guides(
+      fill = guide_colourbar(order = 1, position = "top")
+    )
+  pi
+
+  ggsave(pi, file = here("output/RR_lopoff_map_abs.png"), w = 12, h = 10)
+
+  ## --- combined figure 3
+  fig3 <- ggpubr::ggarrange(p, top20,
+    ncol = 1,
+    labels = c("A", "B")
   )
-p
-
-ggsave(p, file = here("output/RR_lopoff_map_nopoint.png"), w = 12, h = 10)
-
-
-## version with points
-p2 <- p +
-  geom_sf(
-    aes(
-      geometry = mid,
-      size = as.numeric(redn * tb / 1e3)
-    ),
-    show.legend = "point",
-    shape = 1
-  ) +
-  scale_size_continuous(name = sznm)
-p2
-
-ggsave(p2, file = here("output/RR_lopoff_map.png"), w = 12, h = 10)
-
-pi <- ggplot(data = MP) +
-  geom_sf(aes(fill = as.numeric(redn * tb / 1e3))) +
-  scale_fill_distiller(
-    name = "Reduction in tuberculosis incidence (thousands)",
-    na.value = "grey", trans = "sqrt",
-    palette = "Blues", direction = 1
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "right",
-    legend.title = element_text(hjust = 0.5),
-    axis.text.x = element_blank(),
-    axis.text.y = element_blank(),
-    legend.key.width = unit(2, "lines"),
-    legend.key.height = unit(1, "lines")
-  ) +
-  guides(
-    fill = guide_colourbar(order = 1, position = "top")
+  fig3
+  ggsave(fig3,
+    file = here("output/figs/fig3.pdf"),
+    w = 7.5, h = 8, device = cairo_pdf
   )
-pi
+  ggsave(fig3, file = here("output/fig3.png"), w = 7.5, h = 8)
 
-ggsave(pi, file = here("output/RR_lopoff_map_abs.png"), w = 12, h = 10)
-
-## --- combined figure 3
-fig3 <- ggpubr::ggarrange(p, top20,
-  ncol = 1,
-  labels = c("A", "B")
-)
-fig3
-ggsave(fig3, file = here("output/figs/fig3.pdf"), w = 7.5, h = 8, device = cairo_pdf)
-ggsave(fig3, file = here("output/fig3.png"), w = 7.5, h = 8)
-
+} #NOTE end of plotting flag block
