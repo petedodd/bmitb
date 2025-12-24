@@ -2,7 +2,7 @@
 
 # Define an array of parameters for the R script
 params=(
-    # ""                          # basecase
+    ""                          # basecase
     "_Blo"
     "_Bhi"
     "_Clo"

@@ -9,7 +9,7 @@ library(glue)
 library(googlesheets4)
 
 ## output formatting
-source(here("R/brackets.R"))
+source(here("R/utils/brackets.R"))
 
 ## ==== gathering alt CFs ===
 CF <- c("", "_Blo", "_Bhi", "_Clo", "_Chi")

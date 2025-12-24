@@ -10,7 +10,7 @@ library(MASS)
 set.seed(1234)
 
 ## relative risk functions in common
-source(here("R/riskfunctions.R"))
+source(here("R/utils/riskfunctions.R"))
 
 ## ===== example dists: exaggerated
 rrtxt <- mean(exp(BL(bmi1, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))

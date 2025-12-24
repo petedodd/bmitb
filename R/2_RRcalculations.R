@@ -52,10 +52,10 @@ ssum <- function(x) sqrt(sum(x^2))
 
 set.seed(1234)
 ## output formatting
-source(here("R/brackets.R"))
+source(here("R/utils/brackets.R"))
 
 ## relative risk functions in common
-source(here("R/riskfunctions.R"))
+source(here("R/utils/riskfunctions.R"))
 
 
 ## statistics to report
