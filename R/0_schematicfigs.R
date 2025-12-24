@@ -5,41 +5,17 @@ library(data.table)
 library(officer)
 library(rvg)
 library(patchwork)
+library(MASS)
 
-## this block from 2_...
-## risk per one unit increase in BMI was 14.8% (95%CI: 13.3-16.3)
-t <- log(1 - 0.148) # risk function parameter
-1 - exp(t) # risk increase with 1 unit decrease
-## fits from bilinear model
-C <- fread(here("rawdata/general_population_piecewise_parameters.csv"))
-D <- fread(here("rawdata/general_population_vcov_matrix.csv"))
-## 18.0% (95%CI: 16.4-19.6) for BMI<25.0kg/m2 and 6.9% (95%CI: 4.6-9.2) for BMI>=25.0kg/m2 in
-exp(C$Value[4:5]) # corresponds to above
-mut <- C$Value[4:5]
-t1 <- mut[1]
-t2 <- mut[2]
+set.seed(1234)
 
-
-## 'data' for these plots
-bmirefpop <- data.table(k = 25.0, theta = 1.0) # for testing
-BL <- function(x, t1, t2) {
-  ans <- (x - 25)
-  less <- ans < 0
-  ans[less] <- t1 * ans[less]
-  ans[!less] <- t2 * ans[!less]
-  ans
-}
-mean(exp(BL(bmi1, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
-
-
+## relative risk functions in common
+source(here("R/riskfunctions.R"))
 
 ## ===== example dists: exaggerated
-K <- 1e5
-bmi1 <- rgamma(K, shape = 24, scale = 0.8)
-bmi0 <- rgamma(K, shape = bmirefpop$k, scale = bmirefpop$theta)
-## rrtxt <- mean(exp(t * (bmi1 - 30))) / mean(exp(t * (bmi0 - 30)))
 rrtxt <- mean(exp(BL(bmi1, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
-(rrtxt <- round(rrtxt,digits = 2))
+(rrtxt <- round(rrtxt, digits = 2))
+
 
 GP <- ggplot() +
   xlim(10, 45) +
@@ -335,9 +311,7 @@ GPall <- GPall +
     geom = "text", label = "=", size = unit(14, "pt"),
     x = 1.0 / 3 + 1 / 3, y = 1 / 6 + 2 / 3
   )
+GPall
 
 ggsave(GPall, file = here("output/eg_all.png"), w = 7, h = 7)
-
-
-
 
