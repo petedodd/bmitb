@@ -14,7 +14,6 @@ if (shell) {
 }
 cat("*** (using counterfactual =", CF, ") ***\n")
 plotting <- CF == ""
-if (CF != "") CF <- paste0(CF, "_")
 
 ## libraries
 library(here)
@@ -87,7 +86,16 @@ set.seed(1234)
 ## relative risk functions in common
 source(here("R/riskfunctions.R"))
 
-## TODO set risk function here based on CF
+## set risk function here based on CF
+## (see end of riskfunctions.R)
+mean_risk <- fcase(
+  CF == "", RRlopoff,
+  CF == "_Blo", RRflat_lo,
+  CF == "_Bhi", RRflat_hi,
+  CF == "_Clo", RRshift_lo,
+  CF == "_Chi", RRshift_hi
+)
+
 
 ## statistics to report
 outstats <- list()
@@ -380,9 +388,9 @@ summary(DRBL)
 
 
 ## compute values:
-DRBL[, RR0 := RRlopoff(k, theta, t1, t1, 0)]
-DRBL[, RR17 := RRlopoff(k, theta, t1, t1, 17)]
-DRBL[, RR18.5 := RRlopoff(k, theta, t1, t1, 18.5)]
+DRBL[, RR0 := mean_risk(k, theta, t1, t1, 0)] #always RRlopoff0
+DRBL[, RR17 := mean_risk(k, theta, t1, t1, 17)]
+DRBL[, RR18.5 := mean_risk(k, theta, t1, t1, 18.5)]
 
 ## --- reductions by Age and Sex
 ## perfectly correlated weighting in num/den:

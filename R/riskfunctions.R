@@ -200,3 +200,42 @@ bmi17shift[under] <- bmi17shift[under] + 25 - 17
 ## compare
 mean(exp(BL(bmi17shift, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
 RRshift(bmirefpop$k, bmirefpop$theta, t1, t1, 17, 25) # OK
+
+
+## === wrappers for main CF analyses
+
+## --- use 25 as upper bound
+RRflat_hi <- function(k, theta, t1, t2, L) {
+  H <- 25
+  ifelse(L > 0,
+    RRflat(k, theta, t1, t2, L, H),
+    RRlopoff(k, theta, t1, t2, 0)
+  )
+}
+
+RRshift_hi <- function(k, theta, t1, t2, L) {
+  H <- 25
+  ifelse(L > 0,
+    RRshift(k, theta, t1, t2, L, H),
+    RRlopoff(k, theta, t1, t2, 0)
+  )
+}
+
+## --- use (L + 25)/2 as upper bound
+RRflat_lo <- function(k, theta, t1, t2, L) {
+  H <- (L + 25) / 2
+  ifelse(L > 0,
+    RRflat(k, theta, t1, t2, L, H),
+    RRlopoff(k, theta, t1, t2, 0)
+  )
+}
+
+
+RRshift_lo <- function(k, theta, t1, t2, L) {
+  H <- (L + 25) / 2
+  ifelse(L > 0,
+    RRshift(k, theta, t1, t2, L, H),
+    RRlopoff(k, theta, t1, t2, 0)
+  )
+}
+
