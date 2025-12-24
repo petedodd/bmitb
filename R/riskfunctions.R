@@ -128,7 +128,10 @@ RRlopoff <- function(k, theta, t1, t2, L) {
 ## ## test
 ## RRlopoff(24,0.7,t1,t1,0)
 ## RRlopoff(24,0.7,t1,t1,17)
-## RRlopoff(rep(24,10),rep(0.7,10),rep(t1,10),rep(t1,10),rep(17,10))
+## RRlopoff(
+##   runif(10) + rep(24, 10), rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10)
+## )
+
 
 ## --- flat17
 flat0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
@@ -151,6 +154,14 @@ RRflat <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   nmrtr / dnmntr
 }
 
+## RRflat(
+##   runif(10) + rep(24, 10),
+##   rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
+## )
+
+
+
+
 
 ## --- shift17
 RRshift <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
@@ -165,6 +176,11 @@ RRshift <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   dnmntr <- RRlopoff0(k, theta, t1, t2, 0)
   nmrtr / dnmntr
 }
+
+## RRshift(
+##   runif(10) + rep(24, 10),
+##   rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
+## )
 
 ## ========= testing RR calculations
 ## analytical vs sampling
@@ -200,42 +216,4 @@ bmi17shift[under] <- bmi17shift[under] + 25 - 17
 ## compare
 mean(exp(BL(bmi17shift, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
 RRshift(bmirefpop$k, bmirefpop$theta, t1, t1, 17, 25) # OK
-
-
-## === wrappers for main CF analyses
-
-## --- use 25 as upper bound
-RRflat_hi <- function(k, theta, t1, t2, L) {
-  H <- 25
-  ifelse(L > 0,
-    RRflat(k, theta, t1, t2, L, H),
-    RRlopoff(k, theta, t1, t2, 0)
-  )
-}
-
-RRshift_hi <- function(k, theta, t1, t2, L) {
-  H <- 25
-  ifelse(L > 0,
-    RRshift(k, theta, t1, t2, L, H),
-    RRlopoff(k, theta, t1, t2, 0)
-  )
-}
-
-## --- use (L + 25)/2 as upper bound
-RRflat_lo <- function(k, theta, t1, t2, L) {
-  H <- (L + 25) / 2
-  ifelse(L > 0,
-    RRflat(k, theta, t1, t2, L, H),
-    RRlopoff(k, theta, t1, t2, 0)
-  )
-}
-
-
-RRshift_lo <- function(k, theta, t1, t2, L) {
-  H <- (L + 25) / 2
-  ifelse(L > 0,
-    RRshift(k, theta, t1, t2, L, H),
-    RRlopoff(k, theta, t1, t2, 0)
-  )
-}
 

@@ -2,10 +2,10 @@
 
 ## flags for additional analyses
 ## whether running from shell script or not
-shell <- FALSE
+shell <- TRUE
 if (shell) {
   ## running from shell:
-  ## R --slave --vanilla --args < 02_RRcalculations.R ""
+  ## R --slave --vanilla --args "$param" < 2_RRcalculations.R
   args <- commandArgs(trailingOnly = TRUE) # get argsm
   print(args)
   CF <- args[1] # which counterfactual
@@ -30,7 +30,7 @@ load(here("data/DRA.Rdata")) # ado BMI distributions
 load(here("data/DRB.Rdata")) # adult BMI distributions
 load(here("rawdata/N8523.Rdata")) # 2023 demography
 
-TBN <- fread("rawdata/TB_notifications_2024-10-30.csv")
+TBN <- fread(here("rawdata/TB_notifications_2024-10-30.csv"))
 TB <- fread(here("rawdata/TB_burden_age_sex_2024-10-30.csv"))
 whoz <- c("AFR", "AMR", "EMR", "EUR", "SEA", "WPR")
 whozt <- c(
@@ -49,52 +49,13 @@ whokeyshort <- rbind(
 ckey <- unique(TBN[, .(iso3, country, g_whoregion)])
 ## uncertainty aggregation
 ssum <- function(x) sqrt(sum(x^2))
-## output formatting
-rf <- function(x) {
-  dg <- ifelse(abs(x) > 0.01 & abs(x) < 100, 2, 3)
-  x2 <- signif(x, dg)
-  format(
-    x2,
-    digits = dg,
-    nsmall = 0L,
-    big.mark = ",", #or " "
-    justify = "right",
-    drop0trailing = TRUE,
-    scientific = FALSE
-  )
-}
-brkt0 <- function(x, y, z) paste0(x, " (", y, " to ", z, ")")
-brkt0(1, 2, 3)
-brkt <- function(x, y, z) {
-  ans <- brkt0(x, y, z)
-  ans <- gsub("\\([[:space:]]+", "\\(", ans)
-  ans <- gsub("to[[:space:]]+", "to ", ans)
-  ans
-}
-rd <- function(x) round(1e2 * x, 1) #round as %
-brktpc <- function(x, y, z) {       #bracket %
-  brkt0(
-    paste0(rd(x), "%"),
-    paste0(rd(y), "%"),
-    paste0(rd(z), "%")
-  )
-}
-gh <- function(x) glue(here(x))
 
 set.seed(1234)
+## output formatting
+source(here("R/brackets.R"))
 
 ## relative risk functions in common
 source(here("R/riskfunctions.R"))
-
-## set risk function here based on CF
-## (see end of riskfunctions.R)
-mean_risk <- fcase(
-  CF == "", RRlopoff,
-  CF == "_Blo", RRflat_lo,
-  CF == "_Bhi", RRflat_hi,
-  CF == "_Clo", RRshift_lo,
-  CF == "_Chi", RRshift_hi
-)
 
 
 ## statistics to report
@@ -388,9 +349,27 @@ summary(DRBL)
 
 
 ## compute values:
-DRBL[, RR0 := mean_risk(k, theta, t1, t1, 0)] #always RRlopoff0
-DRBL[, RR17 := mean_risk(k, theta, t1, t1, 17)]
-DRBL[, RR18.5 := mean_risk(k, theta, t1, t1, 18.5)]
+DRBL[, RR0 := RRlopoff(k, theta, t1, t1, 0)] # always RRlopoff0
+
+## set risk function here based on CF
+## (see end of riskfunctions.R)
+if (CF == "") {
+  DRBL[, RR17 := RRlopoff(k, theta, t1, t1, 17)]
+  DRBL[, RR18.5 := RRlopoff(k, theta, t1, t1, 18.5)]
+} else if (CF == "_Blo") {
+  DRBL[, RR17 := RRflat(k, theta, t1, t1, 17, (17 + 25) / 2)]
+  DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, (17 + 25) / 2)]
+} else if (CF == "_Bhi") {
+  DRBL[, RR17 := RRflat(k, theta, t1, t1, 17, 25)]
+  DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, 25)]
+} else if (CF == "_Clo") {
+  DRBL[, RR17 := RRshift(k, theta, t1, t1, 17, (17 + 25) / 2)]
+  DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, (17 + 25) / 2)]
+} else if (CF == "_Chi") {
+  DRBL[, RR17 := RRshift(k, theta, t1, t1, 17, 25)]
+  DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, 25)]
+}
+
 
 ## --- reductions by Age and Sex
 ## perfectly correlated weighting in num/den:
@@ -756,12 +735,11 @@ ggplot(RRbySR, aes(region, value,
 if (plotting) {
   ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
   ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6, device = cairo_pdf)
-
+  fwrite(RRbySR, file = here("output/RRbySR.csv"))
 }
 
 ## NOTE this is the other output for all CF
-fwrite(RRbySR, file = gh("output/RRbySR{CF}.csv"))
-
+fwrite(RRbySR[region=="Global"], file = gh("output/RRbySR_r{CF}.csv"))
 
 ## -- % reductions stats
 tmp <- data.table(
@@ -951,8 +929,14 @@ tab$region <- factor(tab$region, levels = c(whozt, "Global"), ordered = TRUE)
 setkey(tab, region)
 tab
 
+if (plotting) {
+  fwrite(tab, file = here("output/table1.csv"))
+}
+
 ## NOTE outputted across all CFs
-fwrite(tab, file = gh("output/table1{CF}.csv"))
+fwrite(tab[region=="Global"], file = gh("output/table1_r{CF}.csv"))
+
+
 
 ## -- output stats
 
@@ -1563,7 +1547,7 @@ if(plotting)
 ## =================================
 ## === map plots
 if (plotting) {
-  
+
   library(sf)
   library(wbmapdata) ## https://github.com/petedodd/wbmapdata
 

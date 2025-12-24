@@ -1,6 +1,9 @@
 #mac users
 .DS_Store
 
+# any plots from headless runs
+Rplots.pdf
+
 #don't include raw data in repo
 rawdata/
 
