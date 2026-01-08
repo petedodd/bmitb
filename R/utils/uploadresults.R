@@ -58,11 +58,23 @@ PW <- dcast(PW,
   value.var = "reduction"
 )
 
+cftoplvls <- c("Not applicable", "halfway to 25 kg/m²", "25 kg/m²")
+
 setcolorder(PW, neworder = c(1, 2, 4, 5, 3, 7, 8, 6))
+PW$counterfactual_top <- factor(PW$counterfactual_top,
+  levels = cftoplvls,
+  ordered = TRUE
+  )
+PW <- PW[order(counterfactual_type, counterfactual_top)]
 fwrite(PW, file = here("output/CF_alt_pc.csv"))
 
 N[, c("region", "counterfactual") := NULL]
 setcolorder(N, neworder = names(PW))
+N$counterfactual_top <- factor(N$counterfactual_top,
+  levels = cftoplvls,
+  ordered = TRUE
+  )
+N <- N[order(counterfactual_type, counterfactual_top)]
 fwrite(N, file = here("output/CF_alt_num.csv"))
 
 ## ==== uploading ===

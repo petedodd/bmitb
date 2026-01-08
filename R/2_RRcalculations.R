@@ -14,6 +14,8 @@ if (shell) {
 }
 cat("*** (using counterfactual =", CF, ") ***\n")
 plotting <- CF == ""
+if (plotting) cat("Base case: doing plotting!\n")
+
 
 ## libraries
 library(here)
@@ -349,7 +351,8 @@ summary(DRBL)
 
 
 ## compute values:
-DRBL[, RR0 := RRlopoff(k, theta, t1, t1, 0)] # always RRlopoff0
+## DRBL[, RR0 := RRlopoff0(k, theta, t1, t1, 0)] # always RRlopoff0
+DRBL[, RR0 := 1.0] # all RR functions now already normalized
 
 ## set risk function here based on CF
 ## (see end of riskfunctions.R)
@@ -358,18 +361,21 @@ if (CF == "") {
   DRBL[, RR18.5 := RRlopoff(k, theta, t1, t1, 18.5)]
 } else if (CF == "_Blo") {
   DRBL[, RR17 := RRflat(k, theta, t1, t1, 17, (17 + 25) / 2)]
-  DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, (17 + 25) / 2)]
+  DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, (18.5 + 25) / 2)]
 } else if (CF == "_Bhi") {
   DRBL[, RR17 := RRflat(k, theta, t1, t1, 17, 25)]
   DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, 25)]
 } else if (CF == "_Clo") {
   DRBL[, RR17 := RRshift(k, theta, t1, t1, 17, (17 + 25) / 2)]
-  DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, (17 + 25) / 2)]
+  DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, (18.5 + 25) / 2)]
 } else if (CF == "_Chi") {
   DRBL[, RR17 := RRshift(k, theta, t1, t1, 17, 25)]
   DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, 25)]
 }
 
+## checks
+DRBL[, summary(RR17)]
+DRBL[, summary(RR18.5)] #should lower risk
 
 ## --- reductions by Age and Sex
 ## perfectly correlated weighting in num/den:
@@ -378,9 +384,10 @@ RRbyAS <- DRBL[Year == 2022, .(
   RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
   RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
   RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
-), by = .(Sex, age, iter)]
-RRbyAS[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
-RRbyAS[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+  ), by = .(Sex, age, iter)]
+## q^2 x \sum ...: see Appendix
+RRbyAS[, RR17.v := RR17f^2 * RR17.fv] #fractional to actual variance
+RRbyAS[, RR18.5.v := RR18.5f^2 * RR18.5.fv] # fractional to actual variance
 ## means/vars over sampled-sources of uncertainty
 RRbyAS <- RRbyAS[,
   .(
@@ -483,7 +490,7 @@ ggplot(RRbyAS, aes(age, value,
 
 if (plotting) {
   ggsave(here("output/RR_age_sex_lopoff_flip.png"), h = 5, w = 5)
-  ggsave(here("output/figs/fig4.pdf"), w = 5, h = 5, device = cairo_pdf)
+  ggsave(here("output/figs/fig5.pdf"), w = 5, h = 5, device = cairo_pdf)
 }
 
 if (plotting) {
@@ -504,8 +511,8 @@ RRbyASR <- DRBL[Year == 2022, .(
   RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
   RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
   ), by = .(Sex, age, g_whoregion,iter)]
-RRbyASR[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
-RRbyASR[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+RRbyASR[, RR17.v := RR17.fv * RR17f^2] #fractional to actual variance
+RRbyASR[, RR18.5.v := RR18.5.fv * RR18.5f^2] # fractional to actual variance
 ## means/vars over sampled-sources of uncertainty
 RRbyASR <- RRbyASR[,
   .(
@@ -640,7 +647,7 @@ RRbySR <- DRBL[Year == 2022, .( #sex/region
   RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
   RR18.5f = sum(RR18.5 * tb) / sum(RR0 * tb),
   RR18.5.fv = sum(S^2 * (RR18.5 / sum(RR18.5 * tb) - RR0 / sum(RR0 * tb))^2)
-  ), by = .(Sex, g_whoregion,iter)]
+  ), by = .(Sex, g_whoregion, iter)]
 RRbySRb <- DRBL[Year == 2022, .( #region
   RR17f = sum(RR17 * tb) / sum(RR0 * tb),
   RR17.fv = sum(S^2 * (RR17 / sum(RR17 * tb) - RR0 / sum(RR0 * tb))^2),
@@ -665,8 +672,8 @@ RRbySGb[, c("g_whoregion", "Sex") := .("Global", "Both")]
 RRbySR <- rbindlist(list(RRbySR, RRbySRb, RRbySG, RRbySGb), use.names = TRUE)
 
 ## onward calculations
-RRbySR[, RR17.v := RR17.fv * RR17f] #fractional to actual variance
-RRbySR[, RR18.5.v := RR18.5.fv * RR18.5f] # fractional to actual variance
+RRbySR[, RR17.v := RR17.fv * RR17f^2] #fractional to actual variance
+RRbySR[, RR18.5.v := RR18.5.fv * RR18.5f^2] # fractional to actual variance
 ## means/vars over sampled-sources of uncertainty
 RRbySR <- RRbySR[,
   .(
@@ -734,7 +741,7 @@ ggplot(RRbySR, aes(region, value,
 
 if (plotting) {
   ggsave(here("output/RR_sex_reg_lopoff2.png"), h = 8, w = 6)
-  ggsave(here("output/figs/fig2.pdf"), h = 8, w = 6, device = cairo_pdf)
+  ggsave(here("output/figs/fig3.pdf"), h = 8, w = 6, device = cairo_pdf)
   fwrite(RRbySR, file = here("output/RRbySR.csv"))
 }
 
@@ -1313,6 +1320,7 @@ GP
 
 if (plotting) {
   ggsave(GP, file = here("output/BMI_reg_age_sex_v2.png"), w = 7, h = 7)
+  ggsave(GP, file = here("output/figs/fig2.pdf"), h = 7, w = 7, device = cairo_pdf)
 }
 
 ## global/regional table output
@@ -1543,6 +1551,23 @@ outstats
 if(plotting)
   fwrite(outstats, file = here("output/outstats.csv"))
 
+## === effective RRs for interest
+## RR = (p + PAF * (1 - p)) / (p * (1 - PAF))
+tmp <- dcast(g_whoregion + Sex ~ variable,
+  data = RRbySR[, .(g_whoregion, Sex, value, variable)],
+  value.var = "value"
+)
+names(tmp)[3:4] <- c("PAF17", "PAF18.5")
+tmp <- merge(tmp,
+  BbyXS[, .(g_whoregion, Sex, p17 = prop17 / 100, p18.5 = prop18.5 / 100)],
+  by = c("g_whoregion", "Sex")
+)
+
+tmp[, RR17 := (p17 + PAF17 * (1 - p17)) / (p17 * (1 - PAF17))]
+tmp[, RR18.5 := (p18.5 + PAF18.5 * (1 - p18.5)) / (p18.5 * (1 - PAF18.5))]
+
+fwrite(tmp, file = gh("output/effective_RR{CF}.csv"))
+
 
 ## =================================
 ## === map plots
@@ -1626,16 +1651,16 @@ if (plotting) {
 
   ggsave(pi, file = here("output/RR_lopoff_map_abs.png"), w = 12, h = 10)
 
-  ## --- combined figure 3
+  ## --- combined figure 3 (now 4)
   fig3 <- ggpubr::ggarrange(p, top20,
     ncol = 1,
     labels = c("A", "B")
   )
   fig3
   ggsave(fig3,
-    file = here("output/figs/fig3.pdf"),
+    file = here("output/figs/fig4.pdf"),
     w = 7.5, h = 8, device = cairo_pdf
   )
-  ggsave(fig3, file = here("output/fig3.png"), w = 7.5, h = 8)
+  ggsave(fig3, file = here("output/fig4.png"), w = 7.5, h = 8)
 
 } #NOTE end of plotting flag block

@@ -100,6 +100,8 @@ mean(bmi0)
 exp(t * (mean(bmi1) - mean(bmi0)))
 RRfun(24, 0.7, t) # about as good as one might expect
 
+## NOTE below: any risk function suffixed 0 is unnormalized
+
 
 ## this file contains the various RR functions
 RRlopoff0 <- function(k, theta, t1, t2, L) {
@@ -117,23 +119,24 @@ RRlopoff0 <- function(k, theta, t1, t2, L) {
   ans / pgamma(L, k, scale = theta, lower.tail = FALSE)
 }
 
-## ## test
-## RRlopoff0(24, 0.7, t1, t1, 17)
+## test
+RRlopoff0(24, 0.7, t1, t1, 17)
 
 RRlopoff <- function(k, theta, t1, t2, L) {
   RRlopoff0(k, theta, t1, t2, L) /
-    RRlopoff0(bmirefpop$k, bmirefpop$theta, t1, t2, 0)
+    RRlopoff0(k, theta, t1, t2, 0)
 }
 
-## ## test
-## RRlopoff(24,0.7,t1,t1,0)
-## RRlopoff(24,0.7,t1,t1,17)
-## RRlopoff(
-##   runif(10) + rep(24, 10), rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10)
-## )
+## test
+RRlopoff(24,0.7,t1,t1,0)
+RRlopoff(24,0.7,t1,t1,17)
+RRlopoff(
+  runif(10) + rep(24, 10), rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10)
+)
 
 
 ## --- flat17
+## average risk from L to H
 flat0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   ## NOTE no dependence on k, theta
   x0 <- 25
@@ -141,30 +144,32 @@ flat0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   exp(x0 * a1) * (exp(-L * a1) - exp(-H * a1)) / (a1 * (H - L))
 }
 
-## ## delta fn test
-## exp(t1 * (17.01 - 25))
-## flat0(bmirefpop$k, bmirefpop$theta, t1, t1, 17, 17.01) # OK
+## delta fn test: risk at 17.01 vs average from 17 to 17.01
+exp(t1 * (17.01 - 25))
+flat0(bmirefpop$k, bmirefpop$theta, t1, t1, 17, 17.01) # OK
 
-
-RRflat <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
+RRflat0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   w <- pgamma(L, k, scale = theta, lower.tail = TRUE)
-  dnmntr <- RRlopoff0(k, theta, t1, t2, 0)
   nmrtr <- w * flat0(k, theta, t1, t2, L, H) +
     (1 - w) * RRlopoff0(k, theta, t1, t2, L)
+  nmrtr
+}
+
+RRflat <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
+  dnmntr <- RRlopoff0(k, theta, t1, t2, 0)
+  nmrtr <- RRflat0(k, theta, t1, t2, L, H)
   nmrtr / dnmntr
 }
 
-## RRflat(
-##   runif(10) + rep(24, 10),
-##   rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
-## )
-
-
-
+## test
+RRflat(
+  runif(10) + rep(24, 10),
+  rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
+)
 
 
 ## --- shift17
-RRshift <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
+RRshift0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   x0 <- 25
   a1 <- -t1
   ans1 <- exp(a1 * (x0 + L - H)) *
@@ -173,14 +178,20 @@ RRshift <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   w <- pgamma(L, k, scale = theta, lower.tail = TRUE)
   nmrtr <- (1 - w) * RRlopoff0(k, theta, t1, t2, L) +
     ans1
+  nmrtr
+}
+
+RRshift <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
+  nmrtr <- RRshift0(k, theta, t1, t2, L, H)
   dnmntr <- RRlopoff0(k, theta, t1, t2, 0)
   nmrtr / dnmntr
 }
 
-## RRshift(
-##   runif(10) + rep(24, 10),
-##   rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
-## )
+## test
+RRshift(
+  runif(10) + rep(24, 10),
+  rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
+)
 
 ## ========= testing RR calculations
 ## analytical vs sampling
