@@ -265,6 +265,48 @@ GP03 <- ggplot() +
   ggpubr::grids()
 GP03
 
+reflect17extra <- function(x) {
+  ifelse(x < 17, 0,
+    dgamma(2 * 17 - x, shape = bmirefpop$k, scale = bmirefpop$theta)
+  )
+}
+
+reflect17 <- function(x, h = 25) {
+  reflect17extra(x) + zero17(x, h)
+}
+
+GP04 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = reflect17extra,
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  geom_vline(xintercept = 25, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP04
+
+GP6 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = reflect17,
+    n = 1e3, col = 2
+  ) +
+  geom_function(
+    fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
+    n = 1e3, lty = 3
+  ) +
+  geom_vline(xintercept = 17, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+GP6
+
+
 
 ## standardize y axes
 ulim <- 0.105
@@ -273,45 +315,47 @@ GP01 <- GP01 + expand_limits(y = c(0, ulim))
 GP01 <- GP01 + expand_limits(y = c(0, ulim))
 GP02 <- GP02 + expand_limits(y = c(0, ulim))
 GP03 <- GP03 + expand_limits(y = c(0, ulim))
+GP04 <- GP04 + expand_limits(y = c(0, ulim))
 GP2 <- GP2 + expand_limits(y = c(0, ulim))
 GP4 <- GP4 + expand_limits(y = c(0, ulim))
 GP5 <- GP5 + expand_limits(y = c(0, ulim))
-
+GP6 <- GP6 + expand_limits(y = c(0, ulim))
 
 ## combine
 GPall <- ((GP00 | GP01 | GP2) + plot_layout(tag_level = "new")) /
   ((GP00 | GP02 | GP4) + plot_layout(tag_level = "new")) /
-  ((GP00 | GP03 | GP5) + plot_layout(tag_level = "new")) +
+  ((GP00 | GP03 | GP5) + plot_layout(tag_level = "new")) /
+  ((GP00 | GP04 | GP6) + plot_layout(tag_level = "new")) +
   plot_annotation(tag_levels = c("A", "1"))
-
 GPall <- ggplotify::as.ggplot(GPall)
 
+h <- c(0.155, 0.4, 0.645, 0.89)
+w <- c(1.05 / 3, 1.0 / 3 + 1 / 3)
 GPall <- GPall +
   annotate(
-    geom = "text", label = "+", size = unit(14, "pt"),
-    x = 1.05 / 3, y = 1 / 6
+    geom = "text", label = "+", size = unit(14, "pt"), x = w[1], y = h[1]
   ) +
   annotate(
-    geom = "text", label = "+", size = unit(14, "pt"),
-    x = 1.05 / 3, y = 1 / 6 + 1 / 3
+    geom = "text", label = "+", size = unit(14, "pt"), x = w[1], y = h[2]
   ) +
   annotate(
-    geom = "text", label = "+", size = unit(14, "pt"),
-    x = 1.05 / 3, y = 1 / 6 + 2 / 3
+    geom = "text", label = "+", size = unit(14, "pt"), x = w[1], y = h[3]
   ) +
   annotate(
-    geom = "text", label = "=", size = unit(14, "pt"),
-    x = 1.0 / 3 + 1 / 3, y = 1 / 6
+    geom = "text", label = "+", size = unit(14, "pt"), x = w[1], y = h[4]
   ) +
   annotate(
-    geom = "text", label = "=", size = unit(14, "pt"),
-    x = 1.0 / 3 + 1 / 3, y = 1 / 6 + 1 / 3
+    geom = "text", label = "=", size = unit(14, "pt"), x = w[2], y = h[1]
   ) +
   annotate(
-    geom = "text", label = "=", size = unit(14, "pt"),
-    x = 1.0 / 3 + 1 / 3, y = 1 / 6 + 2 / 3
+    geom = "text", label = "=", size = unit(14, "pt"), x = w[2], y = h[2]
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"), x = w[2], y = h[3]
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"), x = w[2], y = h[4]
   )
 GPall
 
 ggsave(GPall, file = here("output/eg_all.png"), w = 7, h = 7)
-

@@ -371,6 +371,9 @@ if (CF == "") {
 } else if (CF == "_Chi") {
   DRBL[, RR17 := RRshift(k, theta, t1, t1, 17, 25)]
   DRBL[, RR18.5 := RRshift(k, theta, t1, t1, 18.5, 25)]
+} else if (CF == "D") {
+  DRBL[, RR17 := RRreflect(k, theta, t1, t1, 17)]
+  DRBL[, RR18.5 := RRreflect(k, theta, t1, t1, 18.5)]
 }
 
 ## checks
