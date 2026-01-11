@@ -265,6 +265,7 @@ GP03 <- ggplot() +
   ggpubr::grids()
 GP03
 
+## reflection in line 17
 reflect17extra <- function(x) {
   ifelse(x < 17, 0,
     dgamma(2 * 17 - x, shape = bmirefpop$k, scale = bmirefpop$theta)
@@ -282,7 +283,6 @@ GP04 <- ggplot() +
     n = 1e3, col = 2
   ) +
   geom_vline(xintercept = 17, col = 2, lty = 3) +
-  geom_vline(xintercept = 25, col = 2, lty = 3) +
   xlab("BMI (kg/m^2)") +
   ylab("Density") +
   theme_classic() +

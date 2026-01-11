@@ -12,7 +12,7 @@ library(googlesheets4)
 source(here("R/utils/brackets.R"))
 
 ## ==== gathering alt CFs ===
-CF <- c("", "_Blo", "_Bhi", "_Clo", "_Chi")
+CF <- c("", "_Blo", "_Bhi", "_Clo", "_Chi", "D")
 N <- P <- list()
 for (fend in CF) {
   D <- fread(gh("output/table1_r{fend}.csv"))
@@ -28,11 +28,13 @@ P <- rbindlist(P)
 N[, counterfactual_type := fcase(
   grepl("B", counterfactual), "B",
   grepl("C", counterfactual), "C",
+  grepl("D", counterfactual), "D",
   default = "A"
 )]
 P[, counterfactual_type := fcase(
   grepl("B", counterfactual), "B",
   grepl("C", counterfactual), "C",
+  grepl("D", counterfactual), "D",
   default = "A"
 )]
 
