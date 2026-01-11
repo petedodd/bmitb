@@ -6,6 +6,7 @@ params=(
     "_Bhi"
     "_Clo"
     "_Chi"
+    "D"
 )
 # basecase
 R --slave --vanilla --args "" < 2_RRcalculations.R

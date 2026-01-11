@@ -135,7 +135,7 @@ RRlopoff(
 )
 
 
-## --- flat17
+## --- flat
 ## average risk from L to H
 flat0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   ## NOTE no dependence on k, theta
@@ -168,7 +168,7 @@ RRflat(
 )
 
 
-## --- shift17
+## --- shift
 RRshift0 <- function(k, theta, t1, t2, L, H) { # NOTE assumes H <= 25
   x0 <- 25
   a1 <- -t1
@@ -192,6 +192,40 @@ RRshift(
   runif(10) + rep(24, 10),
   rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10), rep(25, 10)
 )
+
+## --- reflect
+RRreflect0 <- function(k, theta, t1, t2, L) {
+  x0 <- 25
+  a1 <- -t1
+  a2 <- -t2
+  ## reflected bit
+  rans1 <- (pgamma(L, k, scale = theta / (1 - a1 * theta)) -
+    pgamma(2 * L - x0, k, scale = theta / (1 - a1 * theta))) *
+    exp(a1 * (x0 - 2 * L)) / (1 - a1 * theta)^k
+  rans2 <- pgamma(2 * L - x0, k, scale = theta / (1 - a2 * theta)) *
+    exp(a2 * (x0 - 2 * L)) / (1 - a2 * theta)^k
+  ## above lopoff NOTE: assumes L < x0
+  ans1 <- (pgamma(x0, k, scale = theta / (1 + a1 * theta)) -
+    pgamma(L, k, scale = theta / (1 + a1 * theta))) *
+    exp(a1 * x0) / (1 + a1 * theta)^k
+  ans2 <- (1 - pgamma(x0, k, scale = theta / (1 + a2 * theta))) *
+    exp(a2 * x0) / (1 + a2 * theta)^k
+  nmrtr <- rans1 + rans2 + ans1 + ans2
+  nmrtr
+}
+
+RRreflect <- function(k, theta, t1, t2, L) {
+  nmrtr <- RRreflect0(k, theta, t1, t2, L)
+  dnmntr <- RRfunBL0(k, theta, t1, t2)
+  nmrtr / dnmntr
+}
+
+## test
+RRreflect(
+  runif(10) + rep(24, 10),
+  rep(0.7, 10), rep(t1, 10), rep(t1, 10), rep(17, 10)
+)
+
 
 ## ========= testing RR calculations
 ## analytical vs sampling
@@ -228,3 +262,12 @@ bmi17shift[under] <- bmi17shift[under] + 25 - 17
 mean(exp(BL(bmi17shift, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
 RRshift(bmirefpop$k, bmirefpop$theta, t1, t1, 17, 25) # OK
 
+## --- reflect17
+## sample
+bmi17reflect <- bmi0
+bmi17reflect[under] <- 2 * 17 - bmi17reflect[under]
+## hist(bmi17reflect[under])
+
+## compare
+mean(exp(BL(bmi17reflect, t1, t2))) / mean(exp(BL(bmi0, t1, t2)))
+RRreflect(bmirefpop$k, bmirefpop$theta, t1, t1, 17) # OK
