@@ -7,6 +7,7 @@ params=(
     "_Clo"
     "_Chi"
     "D"
+    "spike"
 )
 # basecase
 R --slave --vanilla --args "" < 2_RRcalculations.R

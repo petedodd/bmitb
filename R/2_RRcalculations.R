@@ -374,6 +374,9 @@ if (CF == "") {
 } else if (CF == "D") {
   DRBL[, RR17 := RRreflect(k, theta, t1, t1, 17)]
   DRBL[, RR18.5 := RRreflect(k, theta, t1, t1, 18.5)]
+} else if (CF == "spike") {
+  DRBL[, RR17 := RRflat(k, theta, t1, t1, 17, 17.1)]
+  DRBL[, RR18.5 := RRflat(k, theta, t1, t1, 18.5, 18.6)]
 }
 
 ## checks
