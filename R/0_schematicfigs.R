@@ -359,3 +359,84 @@ GPall <- GPall +
 GPall
 
 ggsave(GPall, file = here("output/eg_all.png"), w = 7, h = 7)
+
+##  ============== spike 18.5
+zero18.5 <- function(x, h = 25) {
+  ifelse(x < 18.5, 0,
+    dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta)
+  )
+}
+
+flat18.5 <- function(x, h = 18.6, fac = 1) {
+  w <- pgamma(18.5, shape = bmirefpop$k, scale = bmirefpop$theta)
+  ifelse(x < 18.5, 0,
+    fac * dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta) +
+      w * ifelse(x < h, 1 / (h - 18.5), 0)
+  )
+}
+
+
+sp1 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = zero18.5,
+    n = 1e3, col = 2
+  ) +
+  geom_function(
+    fun = function(x) dgamma(x, shape = bmirefpop$k, scale = bmirefpop$theta),
+    n = 1e3, col = 1, lty = 3
+  ) +
+  geom_vline(xintercept = 18.5, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+sp1
+
+
+sp2 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = flat18.5,
+    args = list(fac = 0),
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 18.5, col = 2, lty = 3) +
+  geom_vline(xintercept = 18.6, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+sp2
+
+sp3 <- ggplot() +
+  xlim(10, 45) +
+  geom_function(
+    fun = flat18.5,
+    n = 1e3, col = 2
+  ) +
+  geom_vline(xintercept = 18.5, col = 2, lty = 3) +
+  geom_vline(xintercept = 18.6, col = 2, lty = 3) +
+  xlab("BMI (kg/m^2)") +
+  ylab("Density") +
+  theme_classic() +
+  ggpubr::grids()
+sp3
+
+sp1 <- sp1 + expand_limits(y = c(0, 1))
+sp2 <- sp2 + expand_limits(y = c(0, 1))
+sp3 <- sp3 + expand_limits(y = c(0, 1))
+
+## combine
+spall <- (sp1 | sp2 | sp3) + plot_annotation(tag_levels = "1")
+spall <- ggplotify::as.ggplot(spall)
+hh <- 0.4
+spall <- spall +
+  annotate(
+    geom = "text", label = "+", size = unit(14, "pt"), x = w[1], y = hh
+  ) +
+  annotate(
+    geom = "text", label = "=", size = unit(14, "pt"), x = w[2], y = hh
+  )
+
+ggsave(spall, file = here("output/eg_spike.png"), w = 10, h = 5)
