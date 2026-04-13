@@ -1526,11 +1526,12 @@ tmp[, c("MF17.sd", "MF18.5.sd") := .(
   MF18.5 * sqrt((prop18.5.sd_Women / prop18.5_Women)^2 +
     (prop18.5.sd_Men / prop18.5_Men)^2)
 )]
-
-tmp[, c("MF17.lo", "MF18.5.lo", "MF17.hi", "MF18.5.hi") := .(
-  MF17 - MF17.sd * 1.96, MF17 + MF17.sd * 1.96,
-  MF18.5 - MF18.5.sd * 1.96, MF18.5 + MF18.5.sd * 1.96
-  )]
+tmp[, `:=`(
+  MF17.lo = MF17 - MF17.sd * 1.96,
+  MF17.hi = MF17 + MF17.sd * 1.96,
+  MF18.5.lo = MF18.5 - MF18.5.sd * 1.96,
+  MF18.5.hi = MF18.5 + MF18.5.sd * 1.96
+)]
 tmp <- melt(
   tmp[, .(g_whoregion, MF17, MF17.lo, MF17.hi, MF18.5, MF18.5.lo, MF18.5.hi)],
   id = "g_whoregion"

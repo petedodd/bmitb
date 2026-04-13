@@ -1,421 +1,421 @@
 region,Sex,age,variable,value
-Africa,Men,15-19,BMI < 17 kg/m²,0.228265944046491
-Africa,Men,20-24,BMI < 17 kg/m²,0.0782149507276526
-Africa,Men,25-29,BMI < 17 kg/m²,0.0617925710094802
-Africa,Men,30-34,BMI < 17 kg/m²,0.0568402679443363
-Africa,Men,35-39,BMI < 17 kg/m²,0.0585237069093515
-Africa,Men,40-44,BMI < 17 kg/m²,0.0648792786573852
-Africa,Men,45-49,BMI < 17 kg/m²,0.0742963185883406
-Africa,Men,50-54,BMI < 17 kg/m²,0.0836851424999811
-Africa,Men,55-59,BMI < 17 kg/m²,0.0917878923716195
-Africa,Men,60-64,BMI < 17 kg/m²,0.0989629683443682
-Africa,Men,65-69,BMI < 17 kg/m²,0.105182921704814
-Africa,Men,70-74,BMI < 17 kg/m²,0.1131906094309
-Africa,Men,75-79,BMI < 17 kg/m²,0.126726007295817
-Africa,Men,80-84,BMI < 17 kg/m²,0.135720592686815
-Africa,Men,85plus,BMI < 17 kg/m²,0.148234944666055
-Africa,Women,15-19,BMI < 17 kg/m²,0.0876815290324038
-Africa,Women,20-24,BMI < 17 kg/m²,0.0712689063089428
-Africa,Women,25-29,BMI < 17 kg/m²,0.0628979498144726
-Africa,Women,30-34,BMI < 17 kg/m²,0.057087573241689
-Africa,Women,35-39,BMI < 17 kg/m²,0.0542581470112116
-Africa,Women,40-44,BMI < 17 kg/m²,0.0555652719116299
-Africa,Women,45-49,BMI < 17 kg/m²,0.0602856582399569
-Africa,Women,50-54,BMI < 17 kg/m²,0.0672691896674471
-Africa,Women,55-59,BMI < 17 kg/m²,0.0754351365499545
-Africa,Women,60-64,BMI < 17 kg/m²,0.0852723000557655
-Africa,Women,65-69,BMI < 17 kg/m²,0.0979738231676605
-Africa,Women,70-74,BMI < 17 kg/m²,0.116004419544547
-Africa,Women,75-79,BMI < 17 kg/m²,0.143216587650008
-Africa,Women,80-84,BMI < 17 kg/m²,0.168528490257586
-Africa,Women,85plus,BMI < 17 kg/m²,0.197110063999305
-The Americas,Men,15-19,BMI < 17 kg/m²,0.0511865060925024
-The Americas,Men,20-24,BMI < 17 kg/m²,0.0325150542493196
-The Americas,Men,25-29,BMI < 17 kg/m²,0.0150454414304311
-The Americas,Men,30-34,BMI < 17 kg/m²,0.00818072408849624
-The Americas,Men,35-39,BMI < 17 kg/m²,0.00542289016881244
-The Americas,Men,40-44,BMI < 17 kg/m²,0.00430595122947134
-The Americas,Men,45-49,BMI < 17 kg/m²,0.00390735262519549
-The Americas,Men,50-54,BMI < 17 kg/m²,0.00383973867055007
-The Americas,Men,55-59,BMI < 17 kg/m²,0.00391219266648992
-The Americas,Men,60-64,BMI < 17 kg/m²,0.00391452075573423
-The Americas,Men,65-69,BMI < 17 kg/m²,0.0039357607396662
-The Americas,Men,70-74,BMI < 17 kg/m²,0.00411912815300379
-The Americas,Men,75-79,BMI < 17 kg/m²,0.00471023099551882
-The Americas,Men,80-84,BMI < 17 kg/m²,0.00621809681616199
-The Americas,Men,85plus,BMI < 17 kg/m²,0.00919695058427694
-The Americas,Women,15-19,BMI < 17 kg/m²,0.0391028158158224
-The Americas,Women,20-24,BMI < 17 kg/m²,0.0450721776876919
-The Americas,Women,25-29,BMI < 17 kg/m²,0.0250169687623482
-The Americas,Women,30-34,BMI < 17 kg/m²,0.0150507111226543
-The Americas,Women,35-39,BMI < 17 kg/m²,0.010093289102193
-The Americas,Women,40-44,BMI < 17 kg/m²,0.00756428436789278
-The Americas,Women,45-49,BMI < 17 kg/m²,0.00634545893618106
-The Americas,Women,50-54,BMI < 17 kg/m²,0.00601449934156746
-The Americas,Women,55-59,BMI < 17 kg/m²,0.00611288092404219
-The Americas,Women,60-64,BMI < 17 kg/m²,0.006318947476864
-The Americas,Women,65-69,BMI < 17 kg/m²,0.00668537592958692
-The Americas,Women,70-74,BMI < 17 kg/m²,0.00759674766514914
-The Americas,Women,75-79,BMI < 17 kg/m²,0.00969996429596958
-The Americas,Women,80-84,BMI < 17 kg/m²,0.0140598094655247
-The Americas,Women,85plus,BMI < 17 kg/m²,0.0254273967405265
-Eastern Mediterranean,Men,15-19,BMI < 17 kg/m²,0.185463200691412
-Eastern Mediterranean,Men,20-24,BMI < 17 kg/m²,0.0885528129118892
-Eastern Mediterranean,Men,25-29,BMI < 17 kg/m²,0.0428767746711722
-Eastern Mediterranean,Men,30-34,BMI < 17 kg/m²,0.0240231785780296
-Eastern Mediterranean,Men,35-39,BMI < 17 kg/m²,0.0165949958723353
-Eastern Mediterranean,Men,40-44,BMI < 17 kg/m²,0.0139363518575924
-Eastern Mediterranean,Men,45-49,BMI < 17 kg/m²,0.0131838541271729
-Eastern Mediterranean,Men,50-54,BMI < 17 kg/m²,0.0138706120779268
-Eastern Mediterranean,Men,55-59,BMI < 17 kg/m²,0.0150656080647707
-Eastern Mediterranean,Men,60-64,BMI < 17 kg/m²,0.0168957029702438
-Eastern Mediterranean,Men,65-69,BMI < 17 kg/m²,0.0191694925503329
-Eastern Mediterranean,Men,70-74,BMI < 17 kg/m²,0.0216626305572486
-Eastern Mediterranean,Men,75-79,BMI < 17 kg/m²,0.0277781070790696
-Eastern Mediterranean,Men,80-84,BMI < 17 kg/m²,0.0384623918299638
-Eastern Mediterranean,Men,85plus,BMI < 17 kg/m²,0.0635487669995781
-Eastern Mediterranean,Women,15-19,BMI < 17 kg/m²,0.113713962438491
-Eastern Mediterranean,Women,20-24,BMI < 17 kg/m²,0.0843770821854125
-Eastern Mediterranean,Women,25-29,BMI < 17 kg/m²,0.046519659843677
-Eastern Mediterranean,Women,30-34,BMI < 17 kg/m²,0.0263625233958679
-Eastern Mediterranean,Women,35-39,BMI < 17 kg/m²,0.016778255213045
-Eastern Mediterranean,Women,40-44,BMI < 17 kg/m²,0.0126847124120017
-Eastern Mediterranean,Women,45-49,BMI < 17 kg/m²,0.0114231918905836
-Eastern Mediterranean,Women,50-54,BMI < 17 kg/m²,0.0119106180349262
-Eastern Mediterranean,Women,55-59,BMI < 17 kg/m²,0.0136200016444482
-Eastern Mediterranean,Women,60-64,BMI < 17 kg/m²,0.0165233798679901
-Eastern Mediterranean,Women,65-69,BMI < 17 kg/m²,0.0203461803213909
-Eastern Mediterranean,Women,70-74,BMI < 17 kg/m²,0.0249092993689996
-Eastern Mediterranean,Women,75-79,BMI < 17 kg/m²,0.0338234421594844
-Eastern Mediterranean,Women,80-84,BMI < 17 kg/m²,0.046755037974168
-Eastern Mediterranean,Women,85plus,BMI < 17 kg/m²,0.0760091655605137
-Europe,Men,15-19,BMI < 17 kg/m²,0.0569272594747315
-Europe,Men,20-24,BMI < 17 kg/m²,0.0244550054758351
-Europe,Men,25-29,BMI < 17 kg/m²,0.00960069617421198
-Europe,Men,30-34,BMI < 17 kg/m²,0.00438962605256413
-Europe,Men,35-39,BMI < 17 kg/m²,0.00249493092147504
-Europe,Men,40-44,BMI < 17 kg/m²,0.00175830760201597
-Europe,Men,45-49,BMI < 17 kg/m²,0.00141323235733566
-Europe,Men,50-54,BMI < 17 kg/m²,0.00128170017227024
-Europe,Men,55-59,BMI < 17 kg/m²,0.00119504840820314
-Europe,Men,60-64,BMI < 17 kg/m²,0.0011777221579607
-Europe,Men,65-69,BMI < 17 kg/m²,0.0010990508883437
-Europe,Men,70-74,BMI < 17 kg/m²,0.00107094361601316
-Europe,Men,75-79,BMI < 17 kg/m²,0.00109852393710878
-Europe,Men,80-84,BMI < 17 kg/m²,0.0015363696870664
-Europe,Men,85plus,BMI < 17 kg/m²,0.0034088139370486
-Europe,Women,15-19,BMI < 17 kg/m²,0.0473576571692751
-Europe,Women,20-24,BMI < 17 kg/m²,0.0629736561591805
-Europe,Women,25-29,BMI < 17 kg/m²,0.0416304052608487
-Europe,Women,30-34,BMI < 17 kg/m²,0.0281808683462886
-Europe,Women,35-39,BMI < 17 kg/m²,0.0184317939139148
-Europe,Women,40-44,BMI < 17 kg/m²,0.0121093051555245
-Europe,Women,45-49,BMI < 17 kg/m²,0.00857404832380607
-Europe,Women,50-54,BMI < 17 kg/m²,0.0067383669117557
-Europe,Women,55-59,BMI < 17 kg/m²,0.0054569344722953
-Europe,Women,60-64,BMI < 17 kg/m²,0.0045012231687528
-Europe,Women,65-69,BMI < 17 kg/m²,0.00412842126182906
-Europe,Women,70-74,BMI < 17 kg/m²,0.00433355871779557
-Europe,Women,75-79,BMI < 17 kg/m²,0.00534544960780753
-Europe,Women,80-84,BMI < 17 kg/m²,0.00655803173344341
-Europe,Women,85plus,BMI < 17 kg/m²,0.0147454403264531
-Global,Men,15-19,BMI < 17 kg/m²,0.168878810789763
-Global,Men,20-24,BMI < 17 kg/m²,0.0752770231316445
-Global,Men,25-29,BMI < 17 kg/m²,0.0429539409556697
-Global,Men,30-34,BMI < 17 kg/m²,0.0282805020220127
-Global,Men,35-39,BMI < 17 kg/m²,0.0230317243331172
-Global,Men,40-44,BMI < 17 kg/m²,0.0222197254303306
-Global,Men,45-49,BMI < 17 kg/m²,0.0219854191738006
-Global,Men,50-54,BMI < 17 kg/m²,0.0216357695883027
-Global,Men,55-59,BMI < 17 kg/m²,0.0229253668216405
-Global,Men,60-64,BMI < 17 kg/m²,0.0263120164679957
-Global,Men,65-69,BMI < 17 kg/m²,0.0285465569237774
-Global,Men,70-74,BMI < 17 kg/m²,0.0318476744936352
-Global,Men,75-79,BMI < 17 kg/m²,0.0371686615471548
-Global,Men,80-84,BMI < 17 kg/m²,0.0432130603331632
-Global,Men,85plus,BMI < 17 kg/m²,0.0501757418549139
-Global,Women,15-19,BMI < 17 kg/m²,0.110398467996124
-Global,Women,20-24,BMI < 17 kg/m²,0.0968726348623918
-Global,Women,25-29,BMI < 17 kg/m²,0.0635690014770276
-Global,Women,30-34,BMI < 17 kg/m²,0.0429536477600432
-Global,Women,35-39,BMI < 17 kg/m²,0.0313617321783642
-Global,Women,40-44,BMI < 17 kg/m²,0.0255867237935347
-Global,Women,45-49,BMI < 17 kg/m²,0.0233293768723131
-Global,Women,50-54,BMI < 17 kg/m²,0.0221566565889025
-Global,Women,55-59,BMI < 17 kg/m²,0.0230114510533471
-Global,Women,60-64,BMI < 17 kg/m²,0.0263299095890038
-Global,Women,65-69,BMI < 17 kg/m²,0.0289497767400621
-Global,Women,70-74,BMI < 17 kg/m²,0.0332948324618014
-Global,Women,75-79,BMI < 17 kg/m²,0.0408383501112934
-Global,Women,80-84,BMI < 17 kg/m²,0.04934968662869
-Global,Women,85plus,BMI < 17 kg/m²,0.0701987883680705
-South-East Asia,Men,15-19,BMI < 17 kg/m²,0.247941662459707
-South-East Asia,Men,20-24,BMI < 17 kg/m²,0.117686595445916
-South-East Asia,Men,25-29,BMI < 17 kg/m²,0.0688604399436208
-South-East Asia,Men,30-34,BMI < 17 kg/m²,0.0478027680038983
-South-East Asia,Men,35-39,BMI < 17 kg/m²,0.0396233284962072
-South-East Asia,Men,40-44,BMI < 17 kg/m²,0.0382137489662511
-South-East Asia,Men,45-49,BMI < 17 kg/m²,0.0404073095552687
-South-East Asia,Men,50-54,BMI < 17 kg/m²,0.0451081557278022
-South-East Asia,Men,55-59,BMI < 17 kg/m²,0.0525305854552775
-South-East Asia,Men,60-64,BMI < 17 kg/m²,0.0629025340880592
-South-East Asia,Men,65-69,BMI < 17 kg/m²,0.0778535132393414
-South-East Asia,Men,70-74,BMI < 17 kg/m²,0.0977160637671039
-South-East Asia,Men,75-79,BMI < 17 kg/m²,0.124641223548035
-South-East Asia,Men,80-84,BMI < 17 kg/m²,0.157748709777175
-South-East Asia,Men,85plus,BMI < 17 kg/m²,0.193486830954312
-South-East Asia,Women,15-19,BMI < 17 kg/m²,0.199553858867897
-South-East Asia,Women,20-24,BMI < 17 kg/m²,0.145525452751592
-South-East Asia,Women,25-29,BMI < 17 kg/m²,0.0894948833749634
-South-East Asia,Women,30-34,BMI < 17 kg/m²,0.0596346691953792
-South-East Asia,Women,35-39,BMI < 17 kg/m²,0.0448723016102509
-South-East Asia,Women,40-44,BMI < 17 kg/m²,0.0382611239420628
-South-East Asia,Women,45-49,BMI < 17 kg/m²,0.0377939583794921
-South-East Asia,Women,50-54,BMI < 17 kg/m²,0.0413911459267517
-South-East Asia,Women,55-59,BMI < 17 kg/m²,0.0489005678803963
-South-East Asia,Women,60-64,BMI < 17 kg/m²,0.0603260866143168
-South-East Asia,Women,65-69,BMI < 17 kg/m²,0.0757953592676727
-South-East Asia,Women,70-74,BMI < 17 kg/m²,0.0963033242445913
-South-East Asia,Women,75-79,BMI < 17 kg/m²,0.120910535165466
-South-East Asia,Women,80-84,BMI < 17 kg/m²,0.153202970914317
-South-East Asia,Women,85plus,BMI < 17 kg/m²,0.208577483553497
-Western Pacific,Men,15-19,BMI < 17 kg/m²,0.0972306843353623
-Western Pacific,Men,20-24,BMI < 17 kg/m²,0.0495566768101485
-Western Pacific,Men,25-29,BMI < 17 kg/m²,0.0247526239580223
-Western Pacific,Men,30-34,BMI < 17 kg/m²,0.0137373807204907
-Western Pacific,Men,35-39,BMI < 17 kg/m²,0.00941903638269582
-Western Pacific,Men,40-44,BMI < 17 kg/m²,0.00868209996101517
-Western Pacific,Men,45-49,BMI < 17 kg/m²,0.0068166736728073
-Western Pacific,Men,50-54,BMI < 17 kg/m²,0.00631369549140386
-Western Pacific,Men,55-59,BMI < 17 kg/m²,0.00690251130044096
-Western Pacific,Men,60-64,BMI < 17 kg/m²,0.00868860597741865
-Western Pacific,Men,65-69,BMI < 17 kg/m²,0.0100893648019613
-Western Pacific,Men,70-74,BMI < 17 kg/m²,0.0127866409137906
-Western Pacific,Men,75-79,BMI < 17 kg/m²,0.0171546245822344
-Western Pacific,Men,80-84,BMI < 17 kg/m²,0.0240536801112038
-Western Pacific,Men,85plus,BMI < 17 kg/m²,0.0392263519739525
-Western Pacific,Women,15-19,BMI < 17 kg/m²,0.0707516562582326
-Western Pacific,Women,20-24,BMI < 17 kg/m²,0.104356142994477
-Western Pacific,Women,25-29,BMI < 17 kg/m²,0.0710942479606737
-Western Pacific,Women,30-34,BMI < 17 kg/m²,0.0443694301072892
-Western Pacific,Women,35-39,BMI < 17 kg/m²,0.0281196421542123
-Western Pacific,Women,40-44,BMI < 17 kg/m²,0.0195343329834486
-Western Pacific,Women,45-49,BMI < 17 kg/m²,0.0150667946680337
-Western Pacific,Women,50-54,BMI < 17 kg/m²,0.0117765669211137
-Western Pacific,Women,55-59,BMI < 17 kg/m²,0.0106171079621539
-Western Pacific,Women,60-64,BMI < 17 kg/m²,0.0115914509148431
-Western Pacific,Women,65-69,BMI < 17 kg/m²,0.0126476250609901
-Western Pacific,Women,70-74,BMI < 17 kg/m²,0.0162198793938394
-Western Pacific,Women,75-79,BMI < 17 kg/m²,0.0231772697538413
-Western Pacific,Women,80-84,BMI < 17 kg/m²,0.03695745966928
-Western Pacific,Women,85plus,BMI < 17 kg/m²,0.0826184112621117
-Africa,Men,15-19,BMI < 18.5 kg/m²,0.432127944847961
-Africa,Men,20-24,BMI < 18.5 kg/m²,0.200386010187982
-Africa,Men,25-29,BMI < 18.5 kg/m²,0.156993031664945
-Africa,Men,30-34,BMI < 18.5 kg/m²,0.13728811750331
-Africa,Men,35-39,BMI < 18.5 kg/m²,0.13202826301201
-Africa,Men,40-44,BMI < 18.5 kg/m²,0.13681912605278
-Africa,Men,45-49,BMI < 18.5 kg/m²,0.147784644360532
-Africa,Men,50-54,BMI < 18.5 kg/m²,0.159626276442805
-Africa,Men,55-59,BMI < 18.5 kg/m²,0.17025464940152
-Africa,Men,60-64,BMI < 18.5 kg/m²,0.179610897559625
-Africa,Men,65-69,BMI < 18.5 kg/m²,0.188001263230007
-Africa,Men,70-74,BMI < 18.5 kg/m²,0.199872523230703
-Africa,Men,75-79,BMI < 18.5 kg/m²,0.221938686356434
-Africa,Men,80-84,BMI < 18.5 kg/m²,0.238866943934361
-Africa,Men,85plus,BMI < 18.5 kg/m²,0.260022426348295
-Africa,Women,15-19,BMI < 18.5 kg/m²,0.213837091243247
-Africa,Women,20-24,BMI < 18.5 kg/m²,0.157628071876012
-Africa,Women,25-29,BMI < 18.5 kg/m²,0.13234584091546
-Africa,Women,30-34,BMI < 18.5 kg/m²,0.115271328282688
-Africa,Women,35-39,BMI < 18.5 kg/m²,0.105586533623953
-Africa,Women,40-44,BMI < 18.5 kg/m²,0.104179974356005
-Africa,Women,45-49,BMI < 18.5 kg/m²,0.109197520051237
-Africa,Women,50-54,BMI < 18.5 kg/m²,0.118212879016757
-Africa,Women,55-59,BMI < 18.5 kg/m²,0.129416627831187
-Africa,Women,60-64,BMI < 18.5 kg/m²,0.143412680512074
-Africa,Women,65-69,BMI < 18.5 kg/m²,0.161369417334994
-Africa,Women,70-74,BMI < 18.5 kg/m²,0.186741882588018
-Africa,Women,75-79,BMI < 18.5 kg/m²,0.224032388620725
-Africa,Women,80-84,BMI < 18.5 kg/m²,0.256522447206748
-Africa,Women,85plus,BMI < 18.5 kg/m²,0.289452459539185
-The Americas,Men,15-19,BMI < 18.5 kg/m²,0.128139204825506
-The Americas,Men,20-24,BMI < 18.5 kg/m²,0.0721864376889362
-The Americas,Men,25-29,BMI < 18.5 kg/m²,0.0372499069569289
-The Americas,Men,30-34,BMI < 18.5 kg/m²,0.0220067062024022
-The Americas,Men,35-39,BMI < 18.5 kg/m²,0.0153442182029311
-The Americas,Men,40-44,BMI < 18.5 kg/m²,0.0124902559555831
-The Americas,Men,45-49,BMI < 18.5 kg/m²,0.0114592705359031
-The Americas,Men,50-54,BMI < 18.5 kg/m²,0.0113486109024707
-The Americas,Men,55-59,BMI < 18.5 kg/m²,0.0116759641188513
-The Americas,Men,60-64,BMI < 18.5 kg/m²,0.0118376314941471
-The Americas,Men,65-69,BMI < 18.5 kg/m²,0.0120518711443318
-The Americas,Men,70-74,BMI < 18.5 kg/m²,0.0127046263615298
-The Americas,Men,75-79,BMI < 18.5 kg/m²,0.014343924030395
-The Americas,Men,80-84,BMI < 18.5 kg/m²,0.0182805892968487
-The Americas,Men,85plus,BMI < 18.5 kg/m²,0.0256051043640518
-The Americas,Women,15-19,BMI < 18.5 kg/m²,0.100478558851332
-The Americas,Women,20-24,BMI < 18.5 kg/m²,0.0867142631503329
-The Americas,Women,25-29,BMI < 18.5 kg/m²,0.0520779522262324
-The Americas,Women,30-34,BMI < 18.5 kg/m²,0.0336446003169125
-The Americas,Women,35-39,BMI < 18.5 kg/m²,0.0239514033642064
-The Americas,Women,40-44,BMI < 18.5 kg/m²,0.0187427877885827
-The Americas,Women,45-49,BMI < 18.5 kg/m²,0.0161123668656434
-The Americas,Women,50-54,BMI < 18.5 kg/m²,0.015352669839967
-The Americas,Women,55-59,BMI < 18.5 kg/m²,0.0155594298323241
-The Americas,Women,60-64,BMI < 18.5 kg/m²,0.0160559584577304
-The Americas,Women,65-69,BMI < 18.5 kg/m²,0.0169439821944058
-The Americas,Women,70-74,BMI < 18.5 kg/m²,0.0190898036098397
-The Americas,Women,75-79,BMI < 18.5 kg/m²,0.0238126490637174
-The Americas,Women,80-84,BMI < 18.5 kg/m²,0.0331910591386678
-The Americas,Women,85plus,BMI < 18.5 kg/m²,0.0563695648168739
-Eastern Mediterranean,Men,15-19,BMI < 18.5 kg/m²,0.306650856908461
-Eastern Mediterranean,Men,20-24,BMI < 18.5 kg/m²,0.158433342342437
-Eastern Mediterranean,Men,25-29,BMI < 18.5 kg/m²,0.0874453502659852
-Eastern Mediterranean,Men,30-34,BMI < 18.5 kg/m²,0.0539115851580739
-Eastern Mediterranean,Men,35-39,BMI < 18.5 kg/m²,0.0390369654650913
-Eastern Mediterranean,Men,40-44,BMI < 18.5 kg/m²,0.0330838026382402
-Eastern Mediterranean,Men,45-49,BMI < 18.5 kg/m²,0.0311315783995461
-Eastern Mediterranean,Men,50-54,BMI < 18.5 kg/m²,0.0322514694077562
-Eastern Mediterranean,Men,55-59,BMI < 18.5 kg/m²,0.034806499505351
-Eastern Mediterranean,Men,60-64,BMI < 18.5 kg/m²,0.0388502156187936
-Eastern Mediterranean,Men,65-69,BMI < 18.5 kg/m²,0.0438938685173815
-Eastern Mediterranean,Men,70-74,BMI < 18.5 kg/m²,0.0493099619888282
-Eastern Mediterranean,Men,75-79,BMI < 18.5 kg/m²,0.0611174224953328
-Eastern Mediterranean,Men,80-84,BMI < 18.5 kg/m²,0.0795842063536478
-Eastern Mediterranean,Men,85plus,BMI < 18.5 kg/m²,0.117104763315636
-Eastern Mediterranean,Women,15-19,BMI < 18.5 kg/m²,0.217344193449253
-Eastern Mediterranean,Women,20-24,BMI < 18.5 kg/m²,0.147206702617215
-Eastern Mediterranean,Women,25-29,BMI < 18.5 kg/m²,0.0875485381815659
-Eastern Mediterranean,Women,30-34,BMI < 18.5 kg/m²,0.0530150861858519
-Eastern Mediterranean,Women,35-39,BMI < 18.5 kg/m²,0.0351504790843465
-Eastern Mediterranean,Women,40-44,BMI < 18.5 kg/m²,0.0269362827928315
-Eastern Mediterranean,Women,45-49,BMI < 18.5 kg/m²,0.0241385988162469
-Eastern Mediterranean,Women,50-54,BMI < 18.5 kg/m²,0.0247590117200543
-Eastern Mediterranean,Women,55-59,BMI < 18.5 kg/m²,0.0277456798323058
-Eastern Mediterranean,Women,60-64,BMI < 18.5 kg/m²,0.0329648143874395
-Eastern Mediterranean,Women,65-69,BMI < 18.5 kg/m²,0.0398697331222532
-Eastern Mediterranean,Women,70-74,BMI < 18.5 kg/m²,0.0481956668962519
-Eastern Mediterranean,Women,75-79,BMI < 18.5 kg/m²,0.0640000833090196
-Eastern Mediterranean,Women,80-84,BMI < 18.5 kg/m²,0.0856665850932688
-Eastern Mediterranean,Women,85plus,BMI < 18.5 kg/m²,0.130256516200541
-Europe,Men,15-19,BMI < 18.5 kg/m²,0.159212159850013
-Europe,Men,20-24,BMI < 18.5 kg/m²,0.0669477813218173
-Europe,Men,25-29,BMI < 18.5 kg/m²,0.03147789380223
-Europe,Men,30-34,BMI < 18.5 kg/m²,0.0166182337084038
-Europe,Men,35-39,BMI < 18.5 kg/m²,0.010362385926482
-Europe,Men,40-44,BMI < 18.5 kg/m²,0.00764568967253596
-Europe,Men,45-49,BMI < 18.5 kg/m²,0.00625624098813965
-Europe,Men,50-54,BMI < 18.5 kg/m²,0.00564557255640345
-Europe,Men,55-59,BMI < 18.5 kg/m²,0.00522272526901544
-Europe,Men,60-64,BMI < 18.5 kg/m²,0.00506117766280214
-Europe,Men,65-69,BMI < 18.5 kg/m²,0.00476822546649453
-Europe,Men,70-74,BMI < 18.5 kg/m²,0.00469645934096726
-Europe,Men,75-79,BMI < 18.5 kg/m²,0.00485669085889124
-Europe,Men,80-84,BMI < 18.5 kg/m²,0.00629413021964768
-Europe,Men,85plus,BMI < 18.5 kg/m²,0.0123220166320207
-Europe,Women,15-19,BMI < 18.5 kg/m²,0.14330833785903
-Europe,Women,20-24,BMI < 18.5 kg/m²,0.139217155609132
-Europe,Women,25-29,BMI < 18.5 kg/m²,0.0966155194430429
-Europe,Women,30-34,BMI < 18.5 kg/m²,0.0688991804973583
-Europe,Women,35-39,BMI < 18.5 kg/m²,0.0479877221136495
-Europe,Women,40-44,BMI < 18.5 kg/m²,0.0336966465219071
-Europe,Women,45-49,BMI < 18.5 kg/m²,0.0250255837854487
-Europe,Women,50-54,BMI < 18.5 kg/m²,0.0202058965455646
-Europe,Women,55-59,BMI < 18.5 kg/m²,0.0166205497775623
-Europe,Women,60-64,BMI < 18.5 kg/m²,0.0138008274096077
-Europe,Women,65-69,BMI < 18.5 kg/m²,0.0125877940584741
-Europe,Women,70-74,BMI < 18.5 kg/m²,0.0129959149339397
-Europe,Women,75-79,BMI < 18.5 kg/m²,0.0155954162532708
-Europe,Women,80-84,BMI < 18.5 kg/m²,0.0185032554378285
-Europe,Women,85plus,BMI < 18.5 kg/m²,0.0361786530985719
-Global,Men,15-19,BMI < 18.5 kg/m²,0.318580077832837
-Global,Men,20-24,BMI < 18.5 kg/m²,0.157893485021545
-Global,Men,25-29,BMI < 18.5 kg/m²,0.0998471447242668
-Global,Men,30-34,BMI < 18.5 kg/m²,0.0698539086837547
-Global,Men,35-39,BMI < 18.5 kg/m²,0.0575375483935148
-Global,Men,40-44,BMI < 18.5 kg/m²,0.0544689489042471
-Global,Men,45-49,BMI < 18.5 kg/m²,0.052616327607996
-Global,Men,50-54,BMI < 18.5 kg/m²,0.0513113600459016
-Global,Men,55-59,BMI < 18.5 kg/m²,0.0535001918456443
-Global,Men,60-64,BMI < 18.5 kg/m²,0.0594184107980185
-Global,Men,65-69,BMI < 18.5 kg/m²,0.063595455547548
-Global,Men,70-74,BMI < 18.5 kg/m²,0.0693891409604505
-Global,Men,75-79,BMI < 18.5 kg/m²,0.0783326195094812
-Global,Men,80-84,BMI < 18.5 kg/m²,0.0889796504133764
-Global,Men,85plus,BMI < 18.5 kg/m²,0.104627372505118
-Global,Women,15-19,BMI < 18.5 kg/m²,0.234723221820975
-Global,Women,20-24,BMI < 18.5 kg/m²,0.182963570980358
-Global,Women,25-29,BMI < 18.5 kg/m²,0.128087238589771
-Global,Women,30-34,BMI < 18.5 kg/m²,0.0924128030401885
-Global,Women,35-39,BMI < 18.5 kg/m²,0.0703838665985545
-Global,Women,40-44,BMI < 18.5 kg/m²,0.0582307587994586
-Global,Women,45-49,BMI < 18.5 kg/m²,0.0530197917654247
-Global,Women,50-54,BMI < 18.5 kg/m²,0.0503899119929608
-Global,Women,55-59,BMI < 18.5 kg/m²,0.0511165117316833
-Global,Women,60-64,BMI < 18.5 kg/m²,0.055880739651074
-Global,Women,65-69,BMI < 18.5 kg/m²,0.0603203580376319
-Global,Women,70-74,BMI < 18.5 kg/m²,0.0677847302374363
-Global,Women,75-79,BMI < 18.5 kg/m²,0.0805990345582722
-Global,Women,80-84,BMI < 18.5 kg/m²,0.0955925362874266
-Global,Women,85plus,BMI < 18.5 kg/m²,0.131172993859647
-South-East Asia,Men,15-19,BMI < 18.5 kg/m²,0.425074356732587
-South-East Asia,Men,20-24,BMI < 18.5 kg/m²,0.224596799481488
-South-East Asia,Men,25-29,BMI < 18.5 kg/m²,0.148446941625239
-South-East Asia,Men,30-34,BMI < 18.5 kg/m²,0.111714190148782
-South-East Asia,Men,35-39,BMI < 18.5 kg/m²,0.0961348027341371
-South-East Asia,Men,40-44,BMI < 18.5 kg/m²,0.0927574936442099
-South-East Asia,Men,45-49,BMI < 18.5 kg/m²,0.0962977813930369
-South-East Asia,Men,50-54,BMI < 18.5 kg/m²,0.104610591128836
-South-East Asia,Men,55-59,BMI < 18.5 kg/m²,0.117795821177681
-South-East Asia,Men,60-64,BMI < 18.5 kg/m²,0.135721043166365
-South-East Asia,Men,65-69,BMI < 18.5 kg/m²,0.160394540391037
-South-East Asia,Men,70-74,BMI < 18.5 kg/m²,0.191507018153063
-South-East Asia,Men,75-79,BMI < 18.5 kg/m²,0.231535563434138
-South-East Asia,Men,80-84,BMI < 18.5 kg/m²,0.278582167282694
-South-East Asia,Men,85plus,BMI < 18.5 kg/m²,0.343242026589629
-South-East Asia,Women,15-19,BMI < 18.5 kg/m²,0.370604515270143
-South-East Asia,Women,20-24,BMI < 18.5 kg/m²,0.25039585774116
-South-East Asia,Women,25-29,BMI < 18.5 kg/m²,0.167631531663639
-South-East Asia,Women,30-34,BMI < 18.5 kg/m²,0.120076942691822
-South-East Asia,Women,35-39,BMI < 18.5 kg/m²,0.0947428488963629
-South-East Asia,Women,40-44,BMI < 18.5 kg/m²,0.0826798234296084
-South-East Asia,Women,45-49,BMI < 18.5 kg/m²,0.0812779391880438
-South-East Asia,Women,50-54,BMI < 18.5 kg/m²,0.0870925731311009
-South-East Asia,Women,55-59,BMI < 18.5 kg/m²,0.0995022560889274
-South-East Asia,Women,60-64,BMI < 18.5 kg/m²,0.118016174132007
-South-East Asia,Women,65-69,BMI < 18.5 kg/m²,0.142372280099275
-South-East Asia,Women,70-74,BMI < 18.5 kg/m²,0.17344877241293
-South-East Asia,Women,75-79,BMI < 18.5 kg/m²,0.210111985670492
-South-East Asia,Women,80-84,BMI < 18.5 kg/m²,0.256798252874066
-South-East Asia,Women,85plus,BMI < 18.5 kg/m²,0.332404632885311
-Western Pacific,Men,15-19,BMI < 18.5 kg/m²,0.231669194197997
-Western Pacific,Men,20-24,BMI < 18.5 kg/m²,0.111325268325726
-Western Pacific,Men,25-29,BMI < 18.5 kg/m²,0.0648639813686339
-Western Pacific,Men,30-34,BMI < 18.5 kg/m²,0.0415288059206719
-Western Pacific,Men,35-39,BMI < 18.5 kg/m²,0.0313249457109825
-Western Pacific,Men,40-44,BMI < 18.5 kg/m²,0.0297500006238888
-Western Pacific,Men,45-49,BMI < 18.5 kg/m²,0.0250965220036473
-Western Pacific,Men,50-54,BMI < 18.5 kg/m²,0.0242277645397935
-Western Pacific,Men,55-59,BMI < 18.5 kg/m²,0.0263747621534666
-Western Pacific,Men,60-64,BMI < 18.5 kg/m²,0.0314067032928624
-Western Pacific,Men,65-69,BMI < 18.5 kg/m²,0.0358697470734715
-Western Pacific,Men,70-74,BMI < 18.5 kg/m²,0.0435154579572382
-Western Pacific,Men,75-79,BMI < 18.5 kg/m²,0.0549142688612208
-Western Pacific,Men,80-84,BMI < 18.5 kg/m²,0.071735252216309
-Western Pacific,Men,85plus,BMI < 18.5 kg/m²,0.105714822974225
-Western Pacific,Women,15-19,BMI < 18.5 kg/m²,0.188570114178922
-Western Pacific,Women,20-24,BMI < 18.5 kg/m²,0.21019179653091
-Western Pacific,Women,25-29,BMI < 18.5 kg/m²,0.153433428839248
-Western Pacific,Women,30-34,BMI < 18.5 kg/m²,0.106385576378005
-Western Pacific,Women,35-39,BMI < 18.5 kg/m²,0.0747209295260912
-Western Pacific,Women,40-44,BMI < 18.5 kg/m²,0.0561591887291097
-Western Pacific,Women,45-49,BMI < 18.5 kg/m²,0.0459550307026485
-Western Pacific,Women,50-54,BMI < 18.5 kg/m²,0.0384695731833045
-Western Pacific,Women,55-59,BMI < 18.5 kg/m²,0.0357158339564322
-Western Pacific,Women,60-64,BMI < 18.5 kg/m²,0.0379718210719354
-Western Pacific,Women,65-69,BMI < 18.5 kg/m²,0.0405673859665706
-Western Pacific,Women,70-74,BMI < 18.5 kg/m²,0.0490240627866837
-Western Pacific,Women,75-79,BMI < 18.5 kg/m²,0.0643100400546508
-Western Pacific,Women,80-84,BMI < 18.5 kg/m²,0.091814736575122
-Western Pacific,Women,85plus,BMI < 18.5 kg/m²,0.169181531102421
+Africa,Men,15-19,BMI < 17 kg/m²,0.227459052578694
+Africa,Men,20-24,BMI < 17 kg/m²,0.0783659919457984
+Africa,Men,25-29,BMI < 17 kg/m²,0.0612248482264135
+Africa,Men,30-34,BMI < 17 kg/m²,0.0566922246492597
+Africa,Men,35-39,BMI < 17 kg/m²,0.0591750389673492
+Africa,Men,40-44,BMI < 17 kg/m²,0.0656938429035798
+Africa,Men,45-49,BMI < 17 kg/m²,0.0749284335597735
+Africa,Men,50-54,BMI < 17 kg/m²,0.0840132086672216
+Africa,Men,55-59,BMI < 17 kg/m²,0.0918399322475901
+Africa,Men,60-64,BMI < 17 kg/m²,0.100223894618257
+Africa,Men,65-69,BMI < 17 kg/m²,0.107058942644922
+Africa,Men,70-74,BMI < 17 kg/m²,0.114529464012955
+Africa,Men,75-79,BMI < 17 kg/m²,0.125221558817964
+Africa,Men,80-84,BMI < 17 kg/m²,0.135108729414637
+Africa,Men,85plus,BMI < 17 kg/m²,0.147162153274914
+Africa,Women,15-19,BMI < 17 kg/m²,0.0873954597938011
+Africa,Women,20-24,BMI < 17 kg/m²,0.0709953977104276
+Africa,Women,25-29,BMI < 17 kg/m²,0.0626545116738383
+Africa,Women,30-34,BMI < 17 kg/m²,0.0571154105780581
+Africa,Women,35-39,BMI < 17 kg/m²,0.0546819067096197
+Africa,Women,40-44,BMI < 17 kg/m²,0.0559608057354949
+Africa,Women,45-49,BMI < 17 kg/m²,0.0613284347286081
+Africa,Women,50-54,BMI < 17 kg/m²,0.0670424669876635
+Africa,Women,55-59,BMI < 17 kg/m²,0.074390149628843
+Africa,Women,60-64,BMI < 17 kg/m²,0.0855248024719177
+Africa,Women,65-69,BMI < 17 kg/m²,0.0984921948304129
+Africa,Women,70-74,BMI < 17 kg/m²,0.115596240938287
+Africa,Women,75-79,BMI < 17 kg/m²,0.139596966269169
+Africa,Women,80-84,BMI < 17 kg/m²,0.165685579032879
+Africa,Women,85plus,BMI < 17 kg/m²,0.194463390792788
+The Americas,Men,15-19,BMI < 17 kg/m²,0.0511950260214019
+The Americas,Men,20-24,BMI < 17 kg/m²,0.0324932842880067
+The Americas,Men,25-29,BMI < 17 kg/m²,0.0150928032244466
+The Americas,Men,30-34,BMI < 17 kg/m²,0.00822712525996723
+The Americas,Men,35-39,BMI < 17 kg/m²,0.00551750615380541
+The Americas,Men,40-44,BMI < 17 kg/m²,0.00433056057117687
+The Americas,Men,45-49,BMI < 17 kg/m²,0.00388160795954611
+The Americas,Men,50-54,BMI < 17 kg/m²,0.00380377089397008
+The Americas,Men,55-59,BMI < 17 kg/m²,0.00392939315009427
+The Americas,Men,60-64,BMI < 17 kg/m²,0.00393074384623705
+The Americas,Men,65-69,BMI < 17 kg/m²,0.00392557413974467
+The Americas,Men,70-74,BMI < 17 kg/m²,0.00413895724269719
+The Americas,Men,75-79,BMI < 17 kg/m²,0.0047344928302867
+The Americas,Men,80-84,BMI < 17 kg/m²,0.00623465600511289
+The Americas,Men,85plus,BMI < 17 kg/m²,0.00883166955362112
+The Americas,Women,15-19,BMI < 17 kg/m²,0.0392982338166
+The Americas,Women,20-24,BMI < 17 kg/m²,0.0452611590992902
+The Americas,Women,25-29,BMI < 17 kg/m²,0.0251482737821193
+The Americas,Women,30-34,BMI < 17 kg/m²,0.0150561579983868
+The Americas,Women,35-39,BMI < 17 kg/m²,0.010103406452982
+The Americas,Women,40-44,BMI < 17 kg/m²,0.00757787797761551
+The Americas,Women,45-49,BMI < 17 kg/m²,0.00633237114359405
+The Americas,Women,50-54,BMI < 17 kg/m²,0.00600452363485088
+The Americas,Women,55-59,BMI < 17 kg/m²,0.00611314844276507
+The Americas,Women,60-64,BMI < 17 kg/m²,0.00631377054208416
+The Americas,Women,65-69,BMI < 17 kg/m²,0.00666636356521145
+The Americas,Women,70-74,BMI < 17 kg/m²,0.0075689345171713
+The Americas,Women,75-79,BMI < 17 kg/m²,0.00967609410520028
+The Americas,Women,80-84,BMI < 17 kg/m²,0.0140487654017507
+The Americas,Women,85plus,BMI < 17 kg/m²,0.0253668972739901
+Eastern Mediterranean,Men,15-19,BMI < 17 kg/m²,0.184346756902666
+Eastern Mediterranean,Men,20-24,BMI < 17 kg/m²,0.0884194303152972
+Eastern Mediterranean,Men,25-29,BMI < 17 kg/m²,0.0431716443056443
+Eastern Mediterranean,Men,30-34,BMI < 17 kg/m²,0.0246160271907616
+Eastern Mediterranean,Men,35-39,BMI < 17 kg/m²,0.0173618643439989
+Eastern Mediterranean,Men,40-44,BMI < 17 kg/m²,0.0143222021551982
+Eastern Mediterranean,Men,45-49,BMI < 17 kg/m²,0.0129943939443711
+Eastern Mediterranean,Men,50-54,BMI < 17 kg/m²,0.0128857218731544
+Eastern Mediterranean,Men,55-59,BMI < 17 kg/m²,0.0139766928674188
+Eastern Mediterranean,Men,60-64,BMI < 17 kg/m²,0.0161272946284425
+Eastern Mediterranean,Men,65-69,BMI < 17 kg/m²,0.0187233404544255
+Eastern Mediterranean,Men,70-74,BMI < 17 kg/m²,0.0220493238954667
+Eastern Mediterranean,Men,75-79,BMI < 17 kg/m²,0.0284431855010119
+Eastern Mediterranean,Men,80-84,BMI < 17 kg/m²,0.0384672978251383
+Eastern Mediterranean,Men,85plus,BMI < 17 kg/m²,0.0615613558740303
+Eastern Mediterranean,Women,15-19,BMI < 17 kg/m²,0.112978710604921
+Eastern Mediterranean,Women,20-24,BMI < 17 kg/m²,0.0840567628884133
+Eastern Mediterranean,Women,25-29,BMI < 17 kg/m²,0.0463406414081288
+Eastern Mediterranean,Women,30-34,BMI < 17 kg/m²,0.0264263124026962
+Eastern Mediterranean,Women,35-39,BMI < 17 kg/m²,0.0167087574899806
+Eastern Mediterranean,Women,40-44,BMI < 17 kg/m²,0.012325216786787
+Eastern Mediterranean,Women,45-49,BMI < 17 kg/m²,0.0107353787022988
+Eastern Mediterranean,Women,50-54,BMI < 17 kg/m²,0.0112186304820911
+Eastern Mediterranean,Women,55-59,BMI < 17 kg/m²,0.0132710340739697
+Eastern Mediterranean,Women,60-64,BMI < 17 kg/m²,0.0165673842344074
+Eastern Mediterranean,Women,65-69,BMI < 17 kg/m²,0.0206939012712136
+Eastern Mediterranean,Women,70-74,BMI < 17 kg/m²,0.0259615244822476
+Eastern Mediterranean,Women,75-79,BMI < 17 kg/m²,0.0338647027410198
+Eastern Mediterranean,Women,80-84,BMI < 17 kg/m²,0.0460053957902653
+Eastern Mediterranean,Women,85plus,BMI < 17 kg/m²,0.0727556648616252
+Europe,Men,15-19,BMI < 17 kg/m²,0.0567892081816408
+Europe,Men,20-24,BMI < 17 kg/m²,0.0244836573057365
+Europe,Men,25-29,BMI < 17 kg/m²,0.00954785131263156
+Europe,Men,30-34,BMI < 17 kg/m²,0.00436664905225151
+Europe,Men,35-39,BMI < 17 kg/m²,0.00249298126537118
+Europe,Men,40-44,BMI < 17 kg/m²,0.00173936683041727
+Europe,Men,45-49,BMI < 17 kg/m²,0.00140012906396351
+Europe,Men,50-54,BMI < 17 kg/m²,0.00127024976791867
+Europe,Men,55-59,BMI < 17 kg/m²,0.00118094209779941
+Europe,Men,60-64,BMI < 17 kg/m²,0.00116593527782482
+Europe,Men,65-69,BMI < 17 kg/m²,0.00108282106336033
+Europe,Men,70-74,BMI < 17 kg/m²,0.00104681712235983
+Europe,Men,75-79,BMI < 17 kg/m²,0.00108008785321544
+Europe,Men,80-84,BMI < 17 kg/m²,0.00148772789526913
+Europe,Men,85plus,BMI < 17 kg/m²,0.0031301423769843
+Europe,Women,15-19,BMI < 17 kg/m²,0.0470284333264174
+Europe,Women,20-24,BMI < 17 kg/m²,0.0635362214333203
+Europe,Women,25-29,BMI < 17 kg/m²,0.0418654176135525
+Europe,Women,30-34,BMI < 17 kg/m²,0.0282162360340258
+Europe,Women,35-39,BMI < 17 kg/m²,0.018455093974775
+Europe,Women,40-44,BMI < 17 kg/m²,0.0121872490085791
+Europe,Women,45-49,BMI < 17 kg/m²,0.00857403781653254
+Europe,Women,50-54,BMI < 17 kg/m²,0.00666791685615021
+Europe,Women,55-59,BMI < 17 kg/m²,0.00542904268641785
+Europe,Women,60-64,BMI < 17 kg/m²,0.00448172575264368
+Europe,Women,65-69,BMI < 17 kg/m²,0.00412780388583228
+Europe,Women,70-74,BMI < 17 kg/m²,0.0043311255941136
+Europe,Women,75-79,BMI < 17 kg/m²,0.00531780578959871
+Europe,Women,80-84,BMI < 17 kg/m²,0.00662913823656942
+Europe,Women,85plus,BMI < 17 kg/m²,0.0150688828254392
+Global,Men,15-19,BMI < 17 kg/m²,0.167977122846096
+Global,Men,20-24,BMI < 17 kg/m²,0.0752697454229968
+Global,Men,25-29,BMI < 17 kg/m²,0.042882829982895
+Global,Men,30-34,BMI < 17 kg/m²,0.0283026978779666
+Global,Men,35-39,BMI < 17 kg/m²,0.0231224798023042
+Global,Men,40-44,BMI < 17 kg/m²,0.0222159909674017
+Global,Men,45-49,BMI < 17 kg/m²,0.0219222625118588
+Global,Men,50-54,BMI < 17 kg/m²,0.0216289379935766
+Global,Men,55-59,BMI < 17 kg/m²,0.0228888416866869
+Global,Men,60-64,BMI < 17 kg/m²,0.0263635786936712
+Global,Men,65-69,BMI < 17 kg/m²,0.0286710544850783
+Global,Men,70-74,BMI < 17 kg/m²,0.0322946050368334
+Global,Men,75-79,BMI < 17 kg/m²,0.0373195433747787
+Global,Men,80-84,BMI < 17 kg/m²,0.0431583088710476
+Global,Men,85plus,BMI < 17 kg/m²,0.0490815866385181
+Global,Women,15-19,BMI < 17 kg/m²,0.10972113075601
+Global,Women,20-24,BMI < 17 kg/m²,0.0968482960747354
+Global,Women,25-29,BMI < 17 kg/m²,0.063448796998256
+Global,Women,30-34,BMI < 17 kg/m²,0.0428286820408068
+Global,Women,35-39,BMI < 17 kg/m²,0.0313078937265145
+Global,Women,40-44,BMI < 17 kg/m²,0.0255455120211158
+Global,Women,45-49,BMI < 17 kg/m²,0.0233261869250573
+Global,Women,50-54,BMI < 17 kg/m²,0.0220605340877202
+Global,Women,55-59,BMI < 17 kg/m²,0.023000150925447
+Global,Women,60-64,BMI < 17 kg/m²,0.0264734516752993
+Global,Women,65-69,BMI < 17 kg/m²,0.0291014401145509
+Global,Women,70-74,BMI < 17 kg/m²,0.0333193742275613
+Global,Women,75-79,BMI < 17 kg/m²,0.0405387089868685
+Global,Women,80-84,BMI < 17 kg/m²,0.0492314700205506
+Global,Women,85plus,BMI < 17 kg/m²,0.0706952534606238
+South-East Asia,Men,15-19,BMI < 17 kg/m²,0.247690532147992
+South-East Asia,Men,20-24,BMI < 17 kg/m²,0.11747761610617
+South-East Asia,Men,25-29,BMI < 17 kg/m²,0.0687894739933687
+South-East Asia,Men,30-34,BMI < 17 kg/m²,0.0478211531578739
+South-East Asia,Men,35-39,BMI < 17 kg/m²,0.0397216502678697
+South-East Asia,Men,40-44,BMI < 17 kg/m²,0.0382192499774437
+South-East Asia,Men,45-49,BMI < 17 kg/m²,0.0404055451595344
+South-East Asia,Men,50-54,BMI < 17 kg/m²,0.0454045158044826
+South-East Asia,Men,55-59,BMI < 17 kg/m²,0.0525868172907473
+South-East Asia,Men,60-64,BMI < 17 kg/m²,0.0631214651424656
+South-East Asia,Men,65-69,BMI < 17 kg/m²,0.0778734439913296
+South-East Asia,Men,70-74,BMI < 17 kg/m²,0.0971019163381954
+South-East Asia,Men,75-79,BMI < 17 kg/m²,0.12348224693814
+South-East Asia,Men,80-84,BMI < 17 kg/m²,0.156232418777011
+South-East Asia,Men,85plus,BMI < 17 kg/m²,0.191015295177302
+South-East Asia,Women,15-19,BMI < 17 kg/m²,0.199241356494071
+South-East Asia,Women,20-24,BMI < 17 kg/m²,0.145732271555545
+South-East Asia,Women,25-29,BMI < 17 kg/m²,0.0896415907752717
+South-East Asia,Women,30-34,BMI < 17 kg/m²,0.0594880394165059
+South-East Asia,Women,35-39,BMI < 17 kg/m²,0.0448139462097221
+South-East Asia,Women,40-44,BMI < 17 kg/m²,0.0383046594797025
+South-East Asia,Women,45-49,BMI < 17 kg/m²,0.03790501073281
+South-East Asia,Women,50-54,BMI < 17 kg/m²,0.0415144675660587
+South-East Asia,Women,55-59,BMI < 17 kg/m²,0.0490299975512008
+South-East Asia,Women,60-64,BMI < 17 kg/m²,0.0606529651033795
+South-East Asia,Women,65-69,BMI < 17 kg/m²,0.0761254589024101
+South-East Asia,Women,70-74,BMI < 17 kg/m²,0.095783610122089
+South-East Asia,Women,75-79,BMI < 17 kg/m²,0.120217148552186
+South-East Asia,Women,80-84,BMI < 17 kg/m²,0.152629676883499
+South-East Asia,Women,85plus,BMI < 17 kg/m²,0.208242682806753
+Western Pacific,Men,15-19,BMI < 17 kg/m²,0.0968036907558987
+Western Pacific,Men,20-24,BMI < 17 kg/m²,0.0494937545357681
+Western Pacific,Men,25-29,BMI < 17 kg/m²,0.0246669189264748
+Western Pacific,Men,30-34,BMI < 17 kg/m²,0.0136150193980253
+Western Pacific,Men,35-39,BMI < 17 kg/m²,0.00929792919299558
+Western Pacific,Men,40-44,BMI < 17 kg/m²,0.00869027794975394
+Western Pacific,Men,45-49,BMI < 17 kg/m²,0.00693587217871062
+Western Pacific,Men,50-54,BMI < 17 kg/m²,0.00637263434933415
+Western Pacific,Men,55-59,BMI < 17 kg/m²,0.00691333414338383
+Western Pacific,Men,60-64,BMI < 17 kg/m²,0.00879634838578973
+Western Pacific,Men,65-69,BMI < 17 kg/m²,0.0104292390357858
+Western Pacific,Men,70-74,BMI < 17 kg/m²,0.0132574372931825
+Western Pacific,Men,75-79,BMI < 17 kg/m²,0.0176479755695708
+Western Pacific,Men,80-84,BMI < 17 kg/m²,0.0247676391619811
+Western Pacific,Men,85plus,BMI < 17 kg/m²,0.0392519245798486
+Western Pacific,Women,15-19,BMI < 17 kg/m²,0.0701996739223981
+Western Pacific,Women,20-24,BMI < 17 kg/m²,0.104567672434072
+Western Pacific,Women,25-29,BMI < 17 kg/m²,0.0708939209252131
+Western Pacific,Women,30-34,BMI < 17 kg/m²,0.0441960896182822
+Western Pacific,Women,35-39,BMI < 17 kg/m²,0.0280271416404926
+Western Pacific,Women,40-44,BMI < 17 kg/m²,0.0194506625502496
+Western Pacific,Women,45-49,BMI < 17 kg/m²,0.0150287475120293
+Western Pacific,Women,50-54,BMI < 17 kg/m²,0.0116732751892975
+Western Pacific,Women,55-59,BMI < 17 kg/m²,0.0106688980237506
+Western Pacific,Women,60-64,BMI < 17 kg/m²,0.0116225003641121
+Western Pacific,Women,65-69,BMI < 17 kg/m²,0.0127236675914233
+Western Pacific,Women,70-74,BMI < 17 kg/m²,0.0162917331377327
+Western Pacific,Women,75-79,BMI < 17 kg/m²,0.0231409438865504
+Western Pacific,Women,80-84,BMI < 17 kg/m²,0.0371691374598661
+Western Pacific,Women,85plus,BMI < 17 kg/m²,0.0832043796274023
+Africa,Men,15-19,BMI < 18.5 kg/m²,0.431782531420469
+Africa,Men,20-24,BMI < 18.5 kg/m²,0.200567188605245
+Africa,Men,25-29,BMI < 18.5 kg/m²,0.156211460347889
+Africa,Men,30-34,BMI < 18.5 kg/m²,0.137254822269263
+Africa,Men,35-39,BMI < 18.5 kg/m²,0.133263048783768
+Africa,Men,40-44,BMI < 18.5 kg/m²,0.138152064870724
+Africa,Men,45-49,BMI < 18.5 kg/m²,0.148835589300756
+Africa,Men,50-54,BMI < 18.5 kg/m²,0.16007368785436
+Africa,Men,55-59,BMI < 18.5 kg/m²,0.170100011679228
+Africa,Men,60-64,BMI < 18.5 kg/m²,0.181606480103363
+Africa,Men,65-69,BMI < 18.5 kg/m²,0.190926569578967
+Africa,Men,70-74,BMI < 18.5 kg/m²,0.201927881143381
+Africa,Men,75-79,BMI < 18.5 kg/m²,0.219386661567394
+Africa,Men,80-84,BMI < 18.5 kg/m²,0.237212709759345
+Africa,Men,85plus,BMI < 18.5 kg/m²,0.259960414407181
+Africa,Women,15-19,BMI < 18.5 kg/m²,0.213166680703431
+Africa,Women,20-24,BMI < 18.5 kg/m²,0.157171896530878
+Africa,Women,25-29,BMI < 18.5 kg/m²,0.132027844605318
+Africa,Women,30-34,BMI < 18.5 kg/m²,0.115352695471395
+Africa,Women,35-39,BMI < 18.5 kg/m²,0.106241173825723
+Africa,Women,40-44,BMI < 18.5 kg/m²,0.104868087400844
+Africa,Women,45-49,BMI < 18.5 kg/m²,0.110898467631761
+Africa,Women,50-54,BMI < 18.5 kg/m²,0.117783843107742
+Africa,Women,55-59,BMI < 18.5 kg/m²,0.127700956831821
+Africa,Women,60-64,BMI < 18.5 kg/m²,0.143773322008849
+Africa,Women,65-69,BMI < 18.5 kg/m²,0.162200155079825
+Africa,Women,70-74,BMI < 18.5 kg/m²,0.185959293053067
+Africa,Women,75-79,BMI < 18.5 kg/m²,0.218632530929903
+Africa,Women,80-84,BMI < 18.5 kg/m²,0.253037245829089
+Africa,Women,85plus,BMI < 18.5 kg/m²,0.288083957962548
+The Americas,Men,15-19,BMI < 18.5 kg/m²,0.128210019090342
+The Americas,Men,20-24,BMI < 18.5 kg/m²,0.0722525349583898
+The Americas,Men,25-29,BMI < 18.5 kg/m²,0.0374205820657619
+The Americas,Men,30-34,BMI < 18.5 kg/m²,0.0221440127635883
+The Americas,Men,35-39,BMI < 18.5 kg/m²,0.0155656730726288
+The Americas,Men,40-44,BMI < 18.5 kg/m²,0.0125536762400383
+The Americas,Men,45-49,BMI < 18.5 kg/m²,0.0114127921839815
+The Americas,Men,50-54,BMI < 18.5 kg/m²,0.0112753283983202
+The Americas,Men,55-59,BMI < 18.5 kg/m²,0.0117212184971994
+The Americas,Men,60-64,BMI < 18.5 kg/m²,0.0118714400270046
+The Americas,Men,65-69,BMI < 18.5 kg/m²,0.0120266704654607
+The Americas,Men,70-74,BMI < 18.5 kg/m²,0.0127638262611101
+The Americas,Men,75-79,BMI < 18.5 kg/m²,0.0144150122759817
+The Americas,Men,80-84,BMI < 18.5 kg/m²,0.0182969073362618
+The Americas,Men,85plus,BMI < 18.5 kg/m²,0.0245818233488699
+The Americas,Women,15-19,BMI < 18.5 kg/m²,0.100843246573056
+The Americas,Women,20-24,BMI < 18.5 kg/m²,0.0870060112966473
+The Americas,Women,25-29,BMI < 18.5 kg/m²,0.0523108839886399
+The Americas,Women,30-34,BMI < 18.5 kg/m²,0.033692047271379
+The Americas,Women,35-39,BMI < 18.5 kg/m²,0.0239833734095603
+The Americas,Women,40-44,BMI < 18.5 kg/m²,0.0187731567764016
+The Americas,Women,45-49,BMI < 18.5 kg/m²,0.0160942263396157
+The Americas,Women,50-54,BMI < 18.5 kg/m²,0.0153371385145772
+The Americas,Women,55-59,BMI < 18.5 kg/m²,0.0155634027006232
+The Americas,Women,60-64,BMI < 18.5 kg/m²,0.0160378485879365
+The Americas,Women,65-69,BMI < 18.5 kg/m²,0.0168983219603212
+The Americas,Women,70-74,BMI < 18.5 kg/m²,0.0190412008106822
+The Americas,Women,75-79,BMI < 18.5 kg/m²,0.023757864191033
+The Americas,Women,80-84,BMI < 18.5 kg/m²,0.0331900994185183
+The Americas,Women,85plus,BMI < 18.5 kg/m²,0.0563430199190305
+Eastern Mediterranean,Men,15-19,BMI < 18.5 kg/m²,0.305392613815825
+Eastern Mediterranean,Men,20-24,BMI < 18.5 kg/m²,0.158395636338762
+Eastern Mediterranean,Men,25-29,BMI < 18.5 kg/m²,0.0882165729950497
+Eastern Mediterranean,Men,30-34,BMI < 18.5 kg/m²,0.0551227400487182
+Eastern Mediterranean,Men,35-39,BMI < 18.5 kg/m²,0.0403762016680617
+Eastern Mediterranean,Men,40-44,BMI < 18.5 kg/m²,0.0335095349638854
+Eastern Mediterranean,Men,45-49,BMI < 18.5 kg/m²,0.0304905655696124
+Eastern Mediterranean,Men,50-54,BMI < 18.5 kg/m²,0.030311755685107
+Eastern Mediterranean,Men,55-59,BMI < 18.5 kg/m²,0.0327720278654819
+Eastern Mediterranean,Men,60-64,BMI < 18.5 kg/m²,0.0374247070318742
+Eastern Mediterranean,Men,65-69,BMI < 18.5 kg/m²,0.0430324568976894
+Eastern Mediterranean,Men,70-74,BMI < 18.5 kg/m²,0.0500568142219976
+Eastern Mediterranean,Men,75-79,BMI < 18.5 kg/m²,0.0621886195727341
+Eastern Mediterranean,Men,80-84,BMI < 18.5 kg/m²,0.0793832993717393
+Eastern Mediterranean,Men,85plus,BMI < 18.5 kg/m²,0.113420104552511
+Eastern Mediterranean,Women,15-19,BMI < 18.5 kg/m²,0.215881329625022
+Eastern Mediterranean,Women,20-24,BMI < 18.5 kg/m²,0.1467494130419
+Eastern Mediterranean,Women,25-29,BMI < 18.5 kg/m²,0.0873249473025225
+Eastern Mediterranean,Women,30-34,BMI < 18.5 kg/m²,0.0531621270478013
+Eastern Mediterranean,Women,35-39,BMI < 18.5 kg/m²,0.0349978131390256
+Eastern Mediterranean,Women,40-44,BMI < 18.5 kg/m²,0.0262540422883086
+Eastern Mediterranean,Women,45-49,BMI < 18.5 kg/m²,0.0228923771652422
+Eastern Mediterranean,Women,50-54,BMI < 18.5 kg/m²,0.0235363271879492
+Eastern Mediterranean,Women,55-59,BMI < 18.5 kg/m²,0.0271607794521472
+Eastern Mediterranean,Women,60-64,BMI < 18.5 kg/m²,0.033096640429629
+Eastern Mediterranean,Women,65-69,BMI < 18.5 kg/m²,0.0404920953186059
+Eastern Mediterranean,Women,70-74,BMI < 18.5 kg/m²,0.0499018915305219
+Eastern Mediterranean,Women,75-79,BMI < 18.5 kg/m²,0.0639876925614304
+Eastern Mediterranean,Women,80-84,BMI < 18.5 kg/m²,0.0843755928971357
+Eastern Mediterranean,Women,85plus,BMI < 18.5 kg/m²,0.124956452818797
+Europe,Men,15-19,BMI < 18.5 kg/m²,0.158830933564043
+Europe,Men,20-24,BMI < 18.5 kg/m²,0.0667532646450438
+Europe,Men,25-29,BMI < 18.5 kg/m²,0.0311948131960893
+Europe,Men,30-34,BMI < 18.5 kg/m²,0.0165099020214785
+Europe,Men,35-39,BMI < 18.5 kg/m²,0.0103430932013724
+Europe,Men,40-44,BMI < 18.5 kg/m²,0.00758220449024755
+Europe,Men,45-49,BMI < 18.5 kg/m²,0.00620992792476207
+Europe,Men,50-54,BMI < 18.5 kg/m²,0.00561429128175271
+Europe,Men,55-59,BMI < 18.5 kg/m²,0.00518193626270005
+Europe,Men,60-64,BMI < 18.5 kg/m²,0.00502477064030203
+Europe,Men,65-69,BMI < 18.5 kg/m²,0.00471801581328883
+Europe,Men,70-74,BMI < 18.5 kg/m²,0.00462623464547466
+Europe,Men,75-79,BMI < 18.5 kg/m²,0.00481520044253105
+Europe,Men,80-84,BMI < 18.5 kg/m²,0.00617590281376071
+Europe,Men,85plus,BMI < 18.5 kg/m²,0.0116683361253701
+Europe,Women,15-19,BMI < 18.5 kg/m²,0.142330032326151
+Europe,Women,20-24,BMI < 18.5 kg/m²,0.139971585555479
+Europe,Women,25-29,BMI < 18.5 kg/m²,0.0969808663519846
+Europe,Women,30-34,BMI < 18.5 kg/m²,0.0689316508622196
+Europe,Women,35-39,BMI < 18.5 kg/m²,0.0480003526286097
+Europe,Women,40-44,BMI < 18.5 kg/m²,0.0338716750641278
+Europe,Women,45-49,BMI < 18.5 kg/m²,0.0250314822793199
+Europe,Women,50-54,BMI < 18.5 kg/m²,0.0200105190041346
+Europe,Women,55-59,BMI < 18.5 kg/m²,0.0165448612667473
+Europe,Women,60-64,BMI < 18.5 kg/m²,0.0137525808236253
+Europe,Women,65-69,BMI < 18.5 kg/m²,0.0125695649756335
+Europe,Women,70-74,BMI < 18.5 kg/m²,0.0130106504958682
+Europe,Women,75-79,BMI < 18.5 kg/m²,0.0155388589363418
+Europe,Women,80-84,BMI < 18.5 kg/m²,0.0186706753836008
+Europe,Women,85plus,BMI < 18.5 kg/m²,0.0367289715564897
+Global,Men,15-19,BMI < 18.5 kg/m²,0.317825702661709
+Global,Men,20-24,BMI < 18.5 kg/m²,0.157986893472759
+Global,Men,25-29,BMI < 18.5 kg/m²,0.0998544489218632
+Global,Men,30-34,BMI < 18.5 kg/m²,0.0699822307135134
+Global,Men,35-39,BMI < 18.5 kg/m²,0.057675092303488
+Global,Men,40-44,BMI < 18.5 kg/m²,0.0544042823962778
+Global,Men,45-49,BMI < 18.5 kg/m²,0.0525080664724788
+Global,Men,50-54,BMI < 18.5 kg/m²,0.0513095563729915
+Global,Men,55-59,BMI < 18.5 kg/m²,0.0534509889512987
+Global,Men,60-64,BMI < 18.5 kg/m²,0.0595602732955223
+Global,Men,65-69,BMI < 18.5 kg/m²,0.0639253680125596
+Global,Men,70-74,BMI < 18.5 kg/m²,0.0704121498540537
+Global,Men,75-79,BMI < 18.5 kg/m²,0.0787236445748844
+Global,Men,80-84,BMI < 18.5 kg/m²,0.0890307388723085
+Global,Men,85plus,BMI < 18.5 kg/m²,0.103127505815309
+Global,Women,15-19,BMI < 18.5 kg/m²,0.233625250034812
+Global,Women,20-24,BMI < 18.5 kg/m²,0.182916713995921
+Global,Women,25-29,BMI < 18.5 kg/m²,0.127942509166167
+Global,Women,30-34,BMI < 18.5 kg/m²,0.0922226953793121
+Global,Women,35-39,BMI < 18.5 kg/m²,0.0702891450109977
+Global,Women,40-44,BMI < 18.5 kg/m²,0.0581964646092917
+Global,Women,45-49,BMI < 18.5 kg/m²,0.0530525637832742
+Global,Women,50-54,BMI < 18.5 kg/m²,0.050225808916323
+Global,Women,55-59,BMI < 18.5 kg/m²,0.0511537380181263
+Global,Women,60-64,BMI < 18.5 kg/m²,0.0561719201134337
+Global,Women,65-69,BMI < 18.5 kg/m²,0.0606304428267479
+Global,Women,70-74,BMI < 18.5 kg/m²,0.0679391043212409
+Global,Women,75-79,BMI < 18.5 kg/m²,0.0801517150145327
+Global,Women,80-84,BMI < 18.5 kg/m²,0.0955123339089579
+Global,Women,85plus,BMI < 18.5 kg/m²,0.13238215843472
+South-East Asia,Men,15-19,BMI < 18.5 kg/m²,0.425412039594844
+South-East Asia,Men,20-24,BMI < 18.5 kg/m²,0.22451627183243
+South-East Asia,Men,25-29,BMI < 18.5 kg/m²,0.148438306849838
+South-East Asia,Men,30-34,BMI < 18.5 kg/m²,0.111859954537465
+South-East Asia,Men,35-39,BMI < 18.5 kg/m²,0.0963200271043093
+South-East Asia,Men,40-44,BMI < 18.5 kg/m²,0.0927882994844739
+South-East Asia,Men,45-49,BMI < 18.5 kg/m²,0.0963458236489459
+South-East Asia,Men,50-54,BMI < 18.5 kg/m²,0.105163081255345
+South-East Asia,Men,55-59,BMI < 18.5 kg/m²,0.117914596307178
+South-East Asia,Men,60-64,BMI < 18.5 kg/m²,0.136011454921708
+South-East Asia,Men,65-69,BMI < 18.5 kg/m²,0.160317349358623
+South-East Asia,Men,70-74,BMI < 18.5 kg/m²,0.190537250904351
+South-East Asia,Men,75-79,BMI < 18.5 kg/m²,0.229819414494304
+South-East Asia,Men,80-84,BMI < 18.5 kg/m²,0.276553189668578
+South-East Asia,Men,85plus,BMI < 18.5 kg/m²,0.33920282596561
+South-East Asia,Women,15-19,BMI < 18.5 kg/m²,0.370370492909265
+South-East Asia,Women,20-24,BMI < 18.5 kg/m²,0.250652894770483
+South-East Asia,Women,25-29,BMI < 18.5 kg/m²,0.167901023398948
+South-East Asia,Women,30-34,BMI < 18.5 kg/m²,0.11989562886869
+South-East Asia,Women,35-39,BMI < 18.5 kg/m²,0.0946675517388292
+South-East Asia,Women,40-44,BMI < 18.5 kg/m²,0.0827884776923735
+South-East Asia,Women,45-49,BMI < 18.5 kg/m²,0.0815945001176723
+South-East Asia,Women,50-54,BMI < 18.5 kg/m²,0.087457341003121
+South-East Asia,Women,55-59,BMI < 18.5 kg/m²,0.0998271179291179
+South-East Asia,Women,60-64,BMI < 18.5 kg/m²,0.118578723775413
+South-East Asia,Women,65-69,BMI < 18.5 kg/m²,0.142885136493333
+South-East Asia,Women,70-74,BMI < 18.5 kg/m²,0.172720237203456
+South-East Asia,Women,75-79,BMI < 18.5 kg/m²,0.209131783253118
+South-East Asia,Women,80-84,BMI < 18.5 kg/m²,0.255919784611623
+South-East Asia,Women,85plus,BMI < 18.5 kg/m²,0.33161623570688
+Western Pacific,Men,15-19,BMI < 18.5 kg/m²,0.231642466569365
+Western Pacific,Men,20-24,BMI < 18.5 kg/m²,0.111499447455789
+Western Pacific,Men,25-29,BMI < 18.5 kg/m²,0.0648509681369746
+Western Pacific,Men,30-34,BMI < 18.5 kg/m²,0.0412380666301446
+Western Pacific,Men,35-39,BMI < 18.5 kg/m²,0.0310043387884943
+Western Pacific,Men,40-44,BMI < 18.5 kg/m²,0.0297727505298422
+Western Pacific,Men,45-49,BMI < 18.5 kg/m²,0.0254003800832646
+Western Pacific,Men,50-54,BMI < 18.5 kg/m²,0.0243483198124698
+Western Pacific,Men,55-59,BMI < 18.5 kg/m²,0.0263252792690703
+Western Pacific,Men,60-64,BMI < 18.5 kg/m²,0.031606602955389
+Western Pacific,Men,65-69,BMI < 18.5 kg/m²,0.0366327157899837
+Western Pacific,Men,70-74,BMI < 18.5 kg/m²,0.0445233319444665
+Western Pacific,Men,75-79,BMI < 18.5 kg/m²,0.0557722408481683
+Western Pacific,Men,80-84,BMI < 18.5 kg/m²,0.0729175132930933
+Western Pacific,Men,85plus,BMI < 18.5 kg/m²,0.10579485196096
+Western Pacific,Women,15-19,BMI < 18.5 kg/m²,0.187783592835932
+Western Pacific,Women,20-24,BMI < 18.5 kg/m²,0.210799266585672
+Western Pacific,Women,25-29,BMI < 18.5 kg/m²,0.153298933795228
+Western Pacific,Women,30-34,BMI < 18.5 kg/m²,0.106061797109055
+Western Pacific,Women,35-39,BMI < 18.5 kg/m²,0.0745463955777113
+Western Pacific,Women,40-44,BMI < 18.5 kg/m²,0.0560390388118197
+Western Pacific,Women,45-49,BMI < 18.5 kg/m²,0.0458822837469208
+Western Pacific,Women,50-54,BMI < 18.5 kg/m²,0.0382093256405504
+Western Pacific,Women,55-59,BMI < 18.5 kg/m²,0.0358329316423118
+Western Pacific,Women,60-64,BMI < 18.5 kg/m²,0.0380186155410871
+Western Pacific,Women,65-69,BMI < 18.5 kg/m²,0.0407468273814795
+Western Pacific,Women,70-74,BMI < 18.5 kg/m²,0.0491996997179356
+Western Pacific,Women,75-79,BMI < 18.5 kg/m²,0.0642103396490165
+Western Pacific,Women,80-84,BMI < 18.5 kg/m²,0.0921361029891745
+Western Pacific,Women,85plus,BMI < 18.5 kg/m²,0.170081371770706
